@@ -4,6 +4,10 @@ const cors = require('cors');
 const db = require('./src/db');
 const userRoutes = require('./src/routes/user.routes');
 const { errorHandler } = require('./src/middlewares/errorHandler');
+const express = require("express");
+const db = require("./src/db/db");
+const tableCategoryRoutes = require("./src/routes/table-category.routes");
+const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,14 +22,21 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - Body:`, req.body);
   next();
 });
+app.use(express.json());
+
+// Montar rutas
+app.use("/api/table-categories", tableCategoryRoutes);
+
+// Middleware de errores
+app.use(errorHandler);
 
 // Verificar conexión a la base de datos
 async function checkDatabaseConnection() {
   try {
-    await db.query('SELECT 1');
-    console.log('✅ Conexión a la base de datos exitosa');
+    await db.query("SELECT 1");
+    console.log("✅ Conexión a la base de datos exitosa");
   } catch (error) {
-    console.error('❌ Error al conectar con la base de datos:', error.message);
+    console.error("❌ Error al conectar con la base de datos:", error.message);
     process.exit(1);
   }
 }
@@ -49,4 +60,8 @@ async function startServer() {
   });
 }
 
-startServer();
+module.exports = app;
+
+if (require.main === module) {
+  startServer();
+}
