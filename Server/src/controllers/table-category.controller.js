@@ -1,4 +1,4 @@
-const service = require("../services/category.service");
+const service = require("../services/table-category.service.js");
 
 async function getAll(req, res) {
   try {

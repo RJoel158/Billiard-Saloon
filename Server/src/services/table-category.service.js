@@ -1,4 +1,4 @@
-const repository = require("../repositories/category.repository");
+const repository = require("../repositories/table-category.repository.js");
 
 async function getAllCategories() {
   return await repository.findAll();

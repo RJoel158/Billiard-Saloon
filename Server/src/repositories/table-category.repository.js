@@ -1,15 +1,15 @@
-const db = require("../db");
+const db = require("../db/db.js");
 
 async function findAll() {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories"
+    "SELECT id, name, description, base_price, status FROM table_categories WHERE status = 1"
   );
   return rows;
 }
 
 async function findById(id) {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE id = ?",
+    "SELECT id, name, description, base_price, status FROM table_categories WHERE id = ? AND status = 1",
     [id]
   );
   return rows[0] || null;
@@ -17,7 +17,7 @@ async function findById(id) {
 
 async function findByName(name) {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE name = ?",
+    "SELECT id, name, description, base_price, status FROM table_categories WHERE name = ? AND status = 1",
     [name]
   );
   return rows[0] || null;
@@ -25,13 +25,8 @@ async function findByName(name) {
 
 async function create(category) {
   await db.query(
-    "INSERT INTO table_categories (name, description, base_price, status) VALUES (?, ?, ?, ?)",
-    [
-      category.name,
-      category.description,
-      category.base_price,
-      category.status || 1,
-    ]
+    "INSERT INTO table_categories (name, description, base_price) VALUES (?, ?, ?)",
+    [category.name, category.description, category.base_price]
   );
   const rows = await db.query(
     "SELECT id, name, description, base_price, status FROM table_categories WHERE id = LAST_INSERT_ID()"
