@@ -1,17 +1,27 @@
-const express = require('express');
-const db = require('./src/db/db'); // Asegúrate de que el archivo de conexión a la base de datos esté correctamente importado
+const express = require("express");
+const db = require("./src/db/db");
+const tableCategoryRoutes = require("./src/routes/table-category.routes");
+const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
+
+// Montar rutas
+app.use("/api/table-categories", tableCategoryRoutes);
+
+// Middleware de errores
+app.use(errorHandler);
+
 // Verificar conexión a la base de datos
 async function checkDatabaseConnection() {
   try {
-    await db.query('SELECT 1'); // Consulta simple para verificar la conexión
-    console.log('✅ Conexión a la base de datos exitosa');
+    await db.query("SELECT 1");
+    console.log("✅ Conexión a la base de datos exitosa");
   } catch (error) {
-    console.error('❌ Error al conectar con la base de datos:', error.message);
-    process.exit(1); // Detener el servidor si la base de datos no está disponible
+    console.error("❌ Error al conectar con la base de datos:", error.message);
+    process.exit(1);
   }
 }
 
@@ -22,11 +32,15 @@ app.get('/', (req, res) => {
 
 // Iniciar el servidor
 async function startServer() {
-  await checkDatabaseConnection(); // Verificar la base de datos antes de iniciar el servidor
+  await checkDatabaseConnection();
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
   });
 }
 
-startServer();
+module.exports = app;
+
+if (require.main === module) {
+  startServer();
+}
