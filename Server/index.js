@@ -15,6 +15,11 @@ async function checkDatabaseConnection() {
   }
 }
 
+// Definir una ruta para la raíz
+app.get('/', (req, res) => {
+  res.send('¡Bienvenido al servidor! 🚀');
+});
+
 // Iniciar el servidor
 async function startServer() {
   await checkDatabaseConnection(); // Verificar la base de datos antes de iniciar el servidor
