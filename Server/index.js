@@ -1,13 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const db = require('./src/db');
+const db = require('./src/db/db');
 const userRoutes = require('./src/routes/user.routes');
 const { errorHandler } = require('./src/middlewares/errorHandler');
-const express = require("express");
-const db = require("./src/db/db");
 const tableCategoryRoutes = require("./src/routes/table-category.routes");
-const { errorHandler } = require("./src/middlewares/errorHandler");
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,10 +20,11 @@ app.use((req, res, next) => {
   console.log(`${req.method} ${req.path} - Body:`, req.body);
   next();
 });
-app.use(express.json());
+
 
 // Montar rutas
 app.use("/api/table-categories", tableCategoryRoutes);
+app.use('/api/users', userRoutes);
 
 // Middleware de errores
 app.use(errorHandler);
@@ -46,7 +45,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Bienvenido a Billiard Saloon API' });
 });
 
-app.use('/api/v1/users', userRoutes);
+
 
 // Error Handler (debe ir al final)
 app.use(errorHandler);
