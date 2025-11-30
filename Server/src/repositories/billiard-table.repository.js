@@ -1,0 +1,30 @@
+const db = require('../db/db');
+
+async function findAll() {
+  const rows = await db.query('SELECT id, category_id, code, description, status FROM billiard_tables');
+  return rows;
+}
+
+async function findById(id) {
+  const rows = await db.query('SELECT id, category_id, code, description, status FROM billiard_tables WHERE id = ?', [id]);
+  return rows[0] || null;
+}
+
+async function create(table) {
+  await db.query('INSERT INTO billiard_tables (category_id, code, description, status) VALUES (?, ?, ?, ?)', [table.category_id, table.code, table.description || null, table.status || 1]);
+  const rows = await db.query('SELECT id, category_id, code, description, status FROM billiard_tables WHERE id = LAST_INSERT_ID()');
+  return rows[0] || null;
+}
+
+async function update(id, table) {
+  await db.query('UPDATE billiard_tables SET category_id = ?, code = ?, description = ?, status = ? WHERE id = ?', [table.category_id, table.code, table.description, table.status, id]);
+  return await findById(id);
+}
+
+async function deleteById(id) {
+  // Physical delete: table has no is_active in schema, remove row
+  const result = await db.query('DELETE FROM billiard_tables WHERE id = ?', [id]);
+  return result.affectedRows > 0;
+}
+
+module.exports = { findAll, findById, create, update, deleteById };

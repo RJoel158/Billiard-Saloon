@@ -1,5 +1,14 @@
 const paymentService = require('../services/payment.service');
 
+async function list(req, res, next) {
+  try {
+    const payments = await paymentService.getAllPayments();
+    res.json({ success: true, data: payments });
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getById(req, res, next) {
   try {
     const id = Number(req.params.id);
@@ -20,4 +29,14 @@ async function create(req, res, next) {
   }
 }
 
-module.exports = { getById, create };
+async function del(req, res, next) {
+  try {
+    const id = Number(req.params.id);
+    await paymentService.deletePayment(id);
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { list, getById, create, del };

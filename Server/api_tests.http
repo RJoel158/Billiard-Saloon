@@ -1,0 +1,189 @@
+@host = http://localhost:3000
+
+### Table Categories - list
+GET {{host}}/api/table-categories
+
+### Table Categories - get by id
+GET {{host}}/api/table-categories/1
+
+### Table Categories - create
+POST {{host}}/api/table-categories
+Content-Type: application/json
+
+{
+  "name": "Pool - Standard",
+  "description": "Mesa estándar de pool",
+  "base_price": 12.50
+}
+
+### Table Categories - update
+PUT {{host}}/api/table-categories/1
+Content-Type: application/json
+
+{
+  "name": "Pool - Standard (updated)",
+  "description": "Actualizada",
+  "base_price": 13.00,
+  "status": 1
+}
+
+### Table Categories - delete (logical)
+DELETE {{host}}/api/table-categories/1
+
+### Table Categories - search (LIKE) & paged
+GET {{host}}/api/table-categories?search=Pool&limit=10&offset=0
+
+
+
+
+### Users - list
+GET {{host}}/api/users
+
+### Users - get by id
+GET {{host}}/api/users/1
+
+### Users - create
+POST {{host}}/api/users
+Content-Type: application/json
+
+{
+  "role_id": 2,
+  "first_name": "Juan",
+  "last_name": "Perez",
+  "email": "juan.perez@example.com",
+  "password_hash": "test-hash",
+  "phone": "+34123456789"
+}
+
+### Users - update
+PUT {{host}}/api/users/1
+Content-Type: application/json
+
+{
+  "first_name": "Juanito",
+  "last_name": "Perez",
+  "email": "juan.perez@example.com",
+  "phone": "+34123456700"
+}
+
+### Users - delete (logical)
+DELETE {{host}}/api/users/1
+
+### Roles - list
+GET {{host}}/api/roles
+
+### Roles - create
+POST {{host}}/api/roles
+Content-Type: application/json
+
+{
+  "name": "manager"
+}
+
+### Roles - delete (logical)
+DELETE {{host}}/api/roles/1
+
+### Billiard Tables - list
+GET {{host}}/api/tables
+
+### Billiard Tables - create
+POST {{host}}/api/tables
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "code": "T-01",
+  "description": "Mesa junto a la ventana",
+  "status": 1
+}
+
+### Billiard Tables - update
+PUT {{host}}/api/tables/1
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "code": "T-01",
+  "description": "Mesa renovada",
+  "status": 1
+}
+
+### Billiard Tables - delete (logical)
+DELETE {{host}}/api/tables/1
+
+### Dynamic Pricing - list
+GET {{host}}/api/dynamic-pricing
+
+### Dynamic Pricing - create
+POST {{host}}/api/dynamic-pricing
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "type": 1,
+  "percentage": 20.00,
+  "time_start": "18:00:00",
+  "time_end": "22:00:00",
+  "weekday": 6,
+  "date_start": null,
+  "date_end": null,
+  "is_active": 1
+}
+
+### Dynamic Pricing - delete (logical)
+DELETE {{host}}/api/dynamic-pricing/1
+
+### Reservations - list
+GET {{host}}/api/reservations
+
+### Reservations - create
+POST {{host}}/api/reservations
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "table_id": 1,
+  "reservation_date": "2025-12-01T20:00:00",
+  "start_time": "2025-12-01T20:00:00",
+  "end_time": "2025-12-01T21:00:00"
+}
+
+### Reservations - delete (logical)
+DELETE {{host}}/api/reservations/1
+
+### Sessions - list
+GET {{host}}/api/sessions
+
+### Sessions - create
+POST {{host}}/api/sessions
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "reservation_id": null,
+  "table_id": 1,
+  "start_time": "2025-12-01T20:00:00",
+  "end_time": null,
+  "session_type": 2,
+  "final_cost": 0,
+  "status": 1
+}
+
+### Sessions - delete (logical)
+DELETE {{host}}/api/sessions/1
+
+### Payments - list
+GET {{host}}/api/payments
+
+### Payments - create (transactional)
+POST {{host}}/api/payments
+Content-Type: application/json
+
+{
+  "session_id": 1,
+  "amount": 150.00,
+  "method": 1
+}
+
+### Payments - delete (logical)
+DELETE {{host}}/api/payments/1

@@ -1,7 +1,8 @@
 
 CREATE TABLE roles (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL UNIQUE
+    name VARCHAR(50) NOT NULL UNIQUE,
+    is_active TINYINT NOT NULL DEFAULT 1
 );
 
 CREATE TABLE users (
@@ -12,6 +13,7 @@ CREATE TABLE users (
     email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     phone VARCHAR(20),
+    is_active TINYINT NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id)
 );
@@ -83,6 +85,7 @@ CREATE TABLE payments (
     session_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
     method TINYINT NOT NULL COMMENT '1=cash,2=card,3=qr,4=other',
+    is_active TINYINT NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES sessions(id)
 );

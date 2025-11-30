@@ -14,4 +14,22 @@ async function createUser(data) {
   return user;
 }
 
-module.exports = { getUser, createUser };
+async function getAllUsers() {
+  return await userRepo.findAll();
+}
+
+async function updateUser(id, data) {
+  const existing = await userRepo.findById(id);
+  if (!existing) throw new ApiError(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
+  const updated = await userRepo.update(id, data);
+  return updated;
+}
+
+async function deleteUser(id) {
+  const existing = await userRepo.findById(id);
+  if (!existing) throw new ApiError(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
+  await userRepo.deleteById(id);
+  return true;
+}
+
+module.exports = { getUser, createUser, getAllUsers, updateUser, deleteUser };
