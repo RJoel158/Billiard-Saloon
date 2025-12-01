@@ -9,9 +9,8 @@ async function getPayment(id) {
 }
 
 async function getAllPayments() {
-  // simple list of active payments
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE is_active = 1');
-  return rows;
+  // delegate to repository which adapts to schema
+  return await paymentRepo.findAll();
 }
 
 async function create(data) {
@@ -55,8 +54,7 @@ async function create(data) {
 async function deletePayment(id) {
   const existing = await paymentRepo.findById(id);
   if (!existing) throw new ApiError(404, 'PAYMENT_NOT_FOUND', 'Payment not found');
-  const result = await db.query('UPDATE payments SET is_active = 0 WHERE id = ?', [id]);
-  return result.affectedRows > 0;
+  return await paymentRepo.deleteById(id);
 }
 
 module.exports = { getPayment, create, getAllPayments, deletePayment };

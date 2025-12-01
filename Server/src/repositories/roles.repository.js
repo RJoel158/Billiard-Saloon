@@ -1,17 +1,25 @@
 const db = require('../db/db');
+const schema = require('../db/schema');
+
+function _hasActive() {
+  return schema.hasColumn('roles', 'is_active');
+}
 
 async function findAll() {
-  const rows = await db.query('SELECT id, name FROM roles WHERE is_active = 1');
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT id, name FROM roles${extra}`);
   return rows;
 }
 
 async function findById(id) {
-  const rows = await db.query('SELECT id, name FROM roles WHERE id = ? AND is_active = 1', [id]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, name FROM roles WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
 async function findByName(name) {
-  const rows = await db.query('SELECT id, name FROM roles WHERE name = ? AND is_active = 1', [name]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, name FROM roles WHERE name = ?${extra}`, [name]);
   return rows[0] || null;
 }
 
@@ -27,7 +35,11 @@ async function update(id, role) {
 }
 
 async function deleteById(id) {
-  const result = await db.query('UPDATE roles SET is_active = 0 WHERE id = ?', [id]);
+  if (_hasActive()) {
+    const result = await db.query('UPDATE roles SET is_active = 0 WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+  const result = await db.query('DELETE FROM roles WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
 

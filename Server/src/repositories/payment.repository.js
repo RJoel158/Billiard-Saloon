@@ -1,7 +1,13 @@
 const db = require('../db/db');
+const schema = require('../db/schema');
+
+function _hasActive() {
+  return schema.hasColumn('payments', 'is_active');
+}
 
 async function findById(id) {
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE id = ? AND is_active = 1', [id]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
@@ -12,27 +18,38 @@ async function create(payment) {
 }
 
 async function findAll() {
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE is_active = 1 ORDER BY created_at DESC');
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments${extra} ORDER BY created_at DESC`);
   return rows;
 }
 
 async function findAllPaged(limit, offset) {
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE is_active = 1 ORDER BY created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments${extra} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]);
   return rows;
 }
 
 async function findBySession(session_id) {
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE session_id = ? AND is_active = 1 ORDER BY created_at DESC', [session_id]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE session_id = ?${extra} ORDER BY created_at DESC`, [session_id]);
   return rows;
 }
 
 async function update(id, payment) {
-  await db.query('UPDATE payments SET amount = ?, method = ? WHERE id = ? AND is_active = 1', [payment.amount, payment.method, id]);
+  if (_hasActive()) {
+    await db.query('UPDATE payments SET amount = ?, method = ? WHERE id = ? AND is_active = 1', [payment.amount, payment.method, id]);
+  } else {
+    await db.query('UPDATE payments SET amount = ?, method = ? WHERE id = ?', [payment.amount, payment.method, id]);
+  }
   return await findById(id);
 }
 
 async function deleteById(id) {
-  const result = await db.query('UPDATE payments SET is_active = 0 WHERE id = ?', [id]);
+  if (_hasActive()) {
+    const result = await db.query('UPDATE payments SET is_active = 0 WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+  const result = await db.query('DELETE FROM payments WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
 

@@ -1,12 +1,19 @@
 const db = require('../db/db');
+const schema = require('../db/schema');
+
+function _hasActive() {
+  return schema.hasColumn('users', 'is_active');
+}
 
 async function findById(id) {
-  const rows = await db.query('SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users WHERE id = ? AND is_active = 1', [id]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
 async function findByEmail(email) {
-  const rows = await db.query('SELECT id, role_id, first_name, last_name, email FROM users WHERE email = ? AND is_active = 1', [email]);
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email FROM users WHERE email = ?${extra}`, [email]);
   return rows[0] || null;
 }
 
@@ -20,7 +27,8 @@ async function create(user) {
 }
 
 async function findAll() {
-  const rows = await db.query('SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users WHERE is_active = 1');
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users${extra}`);
   return rows;
 }
 
@@ -30,7 +38,11 @@ async function update(id, user) {
 }
 
 async function deleteById(id) {
-  const result = await db.query('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
+  if (_hasActive()) {
+    const result = await db.query('UPDATE users SET is_active = 0 WHERE id = ?', [id]);
+    return result.affectedRows > 0;
+  }
+  const result = await db.query('DELETE FROM users WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
 

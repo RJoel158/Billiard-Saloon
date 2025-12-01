@@ -1,13 +1,14 @@
 const express = require("express");
 const db = require("./src/db/db");
-const tableCategoryRoutes = require("./src/routes/table-category.routes");
-const userRoutes = require("./src/routes/user.routes");
-const paymentRoutes = require("./src/routes/payment.routes");
-const rolesRoutes = require("./src/routes/roles.routes");
-const tableRoutes = require("./src/routes/billiard-table.routes");
-const dynamicPricingRoutes = require("./src/routes/dynamic-pricing.routes");
-const reservationRoutes = require("./src/routes/reservation.routes");
-const sessionRoutes = require("./src/routes/session.routes");
+// routes will be required after schema init in startServer
+let tableCategoryRoutes;
+let userRoutes;
+let paymentRoutes;
+let rolesRoutes;
+let tableRoutes;
+let dynamicPricingRoutes;
+let reservationRoutes;
+let sessionRoutes;
 const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
@@ -15,15 +16,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-// Montar rutas
-app.use("/api/table-categories", tableCategoryRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/roles', rolesRoutes);
-app.use('/api/tables', tableRoutes);
-app.use('/api/dynamic-pricing', dynamicPricingRoutes);
-app.use('/api/reservations', reservationRoutes);
-app.use('/api/sessions', sessionRoutes);
+// Montar rutas (se harán después de inicializar el esquema en startServer)
 
 // Middleware de errores
 app.use(errorHandler);
@@ -47,6 +40,34 @@ app.get('/', (req, res) => {
 // Iniciar el servidor
 async function startServer() {
   await checkDatabaseConnection();
+
+  // Initialize schema info so repositories can adapt queries
+  const schema = require('./src/db/schema');
+  try {
+    await schema.init();
+    console.log('🔎 Esquema cargado (columns detectadas)');
+  } catch (err) {
+    console.warn('⚠️ No se pudo leer el esquema de la DB:', err.message);
+  }
+
+  // Now require and mount routes
+  tableCategoryRoutes = require("./src/routes/table-category.routes");
+  userRoutes = require("./src/routes/user.routes");
+  paymentRoutes = require("./src/routes/payment.routes");
+  rolesRoutes = require("./src/routes/roles.routes");
+  tableRoutes = require("./src/routes/billiard-table.routes");
+  dynamicPricingRoutes = require("./src/routes/dynamic-pricing.routes");
+  reservationRoutes = require("./src/routes/reservation.routes");
+  sessionRoutes = require("./src/routes/session.routes");
+
+  app.use("/api/table-categories", tableCategoryRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/payments', paymentRoutes);
+  app.use('/api/roles', rolesRoutes);
+  app.use('/api/tables', tableRoutes);
+  app.use('/api/dynamic-pricing', dynamicPricingRoutes);
+  app.use('/api/reservations', reservationRoutes);
+  app.use('/api/sessions', sessionRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
