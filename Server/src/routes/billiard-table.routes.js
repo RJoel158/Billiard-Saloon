@@ -1,5 +1,5 @@
 const express = require('express');
-const controller = require('../controllers/user.controller');
+const controller = require('../controllers/billiard-table.controller');
 
 const router = express.Router();
 
@@ -7,6 +7,6 @@ router.get('/', controller.getAll);
 router.get('/:id', controller.getById);
 router.post('/', controller.create);
 router.put('/:id', controller.update);
-router.delete('/:id', controller.deleteUser);
+router.delete('/:id', controller.deleteTable);
 
 module.exports = router;

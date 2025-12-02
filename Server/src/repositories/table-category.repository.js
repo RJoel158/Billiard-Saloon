@@ -2,14 +2,14 @@ const db = require("../db/db.js");
 
 async function findAll() {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE status = 1"
+    "SELECT id, name, description, base_price FROM table_categories"
   );
   return rows;
 }
 
 async function findById(id) {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE id = ? AND status = 1",
+    "SELECT id, name, description, base_price FROM table_categories WHERE id = ?",
     [id]
   );
   return rows[0] || null;
@@ -17,10 +17,32 @@ async function findById(id) {
 
 async function findByName(name) {
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE name = ? AND status = 1",
+    "SELECT id, name, description, base_price FROM table_categories WHERE name = ?",
     [name]
   );
   return rows[0] || null;
+}
+
+async function findByNameLike(term) {
+  const like = `%${term}%`;
+  const rows = await db.query(
+    "SELECT id, name, description, base_price FROM table_categories WHERE name LIKE ?",
+    [like]
+  );
+  return rows;
+}
+
+async function findAllPaged(limit, offset) {
+  const rows = await db.query(
+    "SELECT id, name, description, base_price FROM table_categories ORDER BY name LIMIT ? OFFSET ?",
+    [limit, offset]
+  );
+  return rows;
+}
+
+async function countActive() {
+  const rows = await db.query('SELECT COUNT(*) as cnt FROM table_categories');
+  return rows[0].cnt || 0;
 }
 
 async function create(category) {
@@ -29,31 +51,25 @@ async function create(category) {
     [category.name, category.description, category.base_price]
   );
   const rows = await db.query(
-    "SELECT id, name, description, base_price, status FROM table_categories WHERE id = LAST_INSERT_ID()"
+    "SELECT id, name, description, base_price FROM table_categories WHERE id = LAST_INSERT_ID()"
   );
   return rows[0] || null;
 }
 
 async function update(id, category) {
   await db.query(
-    "UPDATE table_categories SET name = ?, description = ?, base_price = ?, status = ? WHERE id = ?",
-    [
-      category.name,
-      category.description,
-      category.base_price,
-      category.status,
-      id,
-    ]
+    "UPDATE table_categories SET name = ?, description = ?, base_price = ? WHERE id = ?",
+    [category.name, category.description, category.base_price, id]
   );
   return await findById(id);
 }
 
 async function deleteById(id) {
   const result = await db.query(
-    "UPDATE table_categories SET status = 0 WHERE id = ?",
+    "DELETE FROM table_categories WHERE id = ?",
     [id]
   );
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, findByName, create, update, deleteById };
+module.exports = { findAll, findById, findByName, findByNameLike, findAllPaged, countActive, create, update, deleteById };
