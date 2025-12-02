@@ -1,0 +1,265 @@
+### Variables
+@baseUrl = http://localhost:3000/api
+@token = tu_jwt_token_aqui
+
+###
+### 📧 AUTENTICACIÓN - REGISTRO
+###
+
+### 1. Registrar nuevo usuario
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "mauricio",
+  "last_name": "Linaja",
+  "email": "mauriciolinaja422@gmail.com"
+}
+
+###
+
+### 2. Intentar registrar con email ya existente
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "Carlos",
+  "last_name": "García",
+  "email": "juan.perez@gmail.com"
+}
+
+###
+
+### 3. Registrar sin email (error)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "Pedro",
+  "last_name": "López"
+}
+
+###
+
+### 4. Registrar con email inválido (error)
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "María",
+  "last_name": "González",
+  "email": "email_invalido"
+}
+
+###
+
+### 5. Solicitar restablecimiento de contraseña
+POST {{baseUrl}}/auth/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "juan.perez@gmail.com"
+}
+
+###
+
+### 6. Solicitar reset con email inexistente (por seguridad, devuelve mensaje genérico)
+POST {{baseUrl}}/auth/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "no.existe@gmail.com"
+}
+
+###
+
+### 7. Cambiar contraseña temporal (requiere autenticación)
+POST {{baseUrl}}/auth/change-temporary-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "newPassword": "MiNuevaContraseña123!",
+  "confirmPassword": "MiNuevaContraseña123!"
+}
+
+###
+
+### 8. Cambiar contraseña - Contraseñas no coinciden
+POST {{baseUrl}}/auth/change-temporary-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "newPassword": "MiNuevaContraseña123!",
+  "confirmPassword": "OtraContraseña456!"
+}
+
+###
+
+### 9. Cambiar contraseña - Muy débil (menos de 8 caracteres)
+POST {{baseUrl}}/auth/change-temporary-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "newPassword": "Corta1!",
+  "confirmPassword": "Corta1!"
+}
+
+###
+### 👥 USUARIOS - CRUD
+###
+
+### 10. Obtener todos los usuarios
+GET {{baseUrl}}/users
+
+###
+
+### 11. Obtener usuario por ID
+GET {{baseUrl}}/users/1
+
+###
+
+### 12. Crear usuario manualmente (sin email de bienvenida)
+POST {{baseUrl}}/users
+Content-Type: application/json
+
+{
+  "role_id": 2,
+  "first_name": "TEST",
+  "last_name": "User",
+  "email": "test@example.com",
+  "password_hash": "$2b$10$...",
+  "status": 1
+}
+
+###
+
+### 13. Actualizar usuario
+PUT {{baseUrl}}/users/1
+Content-Type: application/json
+
+{
+  "first_name": "JuanActualizado",
+  "last_name": "PérezActualizado",
+  "phone": "+34 666 777 888"
+}
+
+###
+
+### 14. Eliminar usuario
+DELETE {{baseUrl}}/users/1
+
+###
+### 📊 ROLES
+###
+
+### 15. Obtener todos los roles
+GET {{baseUrl}}/roles
+
+###
+
+###
+### 💳 PAGOS
+###
+
+### 16. Obtener todos los pagos
+GET {{baseUrl}}/payments
+
+###
+
+### 17. Crear pago
+POST {{baseUrl}}/payments
+Content-Type: application/json
+
+{
+  "session_id": 1,
+  "amount": 25.50,
+  "method": 1
+}
+
+###
+
+###
+### 🎱 MESAS DE BILLAR
+###
+
+### 18. Obtener todas las mesas
+GET {{baseUrl}}/tables
+
+###
+
+### 19. Obtener mesa por ID
+GET {{baseUrl}}/tables/1
+
+###
+
+###
+### 📅 RESERVACIONES
+###
+
+### 20. Obtener todas las reservaciones
+GET {{baseUrl}}/reservations
+
+###
+
+### 21. Crear reservación
+POST {{baseUrl}}/reservations
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "table_id": 1,
+  "reservation_date": "2025-12-05",
+  "start_time": "18:00",
+  "end_time": "20:00"
+}
+
+###
+
+###
+### 🎮 SESIONES
+###
+
+### 22. Obtener todas las sesiones
+GET {{baseUrl}}/sessions
+
+###
+
+### 23. Crear sesión
+POST {{baseUrl}}/sessions
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "table_id": 1,
+  "session_type": 2,
+  "status": 1
+}
+
+###
+
+###
+### 💰 PRECIOS DINÁMICOS
+###
+
+### 24. Obtener precios dinámicos
+GET {{baseUrl}}/dynamic-pricing
+
+###
+
+### 25. Crear precio dinámico
+POST {{baseUrl}}/dynamic-pricing
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "type": 1,
+  "percentage": 15.00,
+  "time_start": "18:00",
+  "time_end": "22:00",
+  "weekday": 5
+}
+
+###

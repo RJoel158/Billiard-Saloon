@@ -1,5 +1,6 @@
 const express = require("express");
 const db = require("./src/db/db");
+require('dotenv').config(); // Cargar variables de entorno
 // routes will be required after schema init in startServer
 let tableCategoryRoutes;
 let userRoutes;
@@ -9,6 +10,7 @@ let tableRoutes;
 let dynamicPricingRoutes;
 let reservationRoutes;
 let sessionRoutes;
+let authRoutes;
 const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
@@ -59,6 +61,7 @@ async function startServer() {
   dynamicPricingRoutes = require("./src/routes/dynamic-pricing.routes");
   reservationRoutes = require("./src/routes/reservation.routes");
   sessionRoutes = require("./src/routes/session.routes");
+  authRoutes = require("./src/routes/auth.routes");
 
   app.use("/api/table-categories", tableCategoryRoutes);
   app.use('/api/users', userRoutes);
@@ -68,6 +71,7 @@ async function startServer() {
   app.use('/api/dynamic-pricing', dynamicPricingRoutes);
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/sessions', sessionRoutes);
+  app.use('/api/auth', authRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

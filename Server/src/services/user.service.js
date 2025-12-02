@@ -7,6 +7,11 @@ async function getUser(id) {
   return user;
 }
 
+async function getUserByEmail(email) {
+  const user = await userRepo.findByEmail(email);
+  return user; // Retorna null si no existe
+}
+
 async function createUser(data) {
   const existing = await userRepo.findByEmail(data.email);
   if (existing) throw new ApiError(409, 'EMAIL_EXISTS', 'Email ya registrado');
@@ -32,4 +37,4 @@ async function deleteUser(id) {
   return true;
 }
 
-module.exports = { getUser, createUser, getAllUsers, updateUser, deleteUser };
+module.exports = { getUser, getUserByEmail, createUser, getAllUsers, updateUser, deleteUser };
