@@ -33,7 +33,10 @@ async function findAll() {
 }
 
 async function update(id, user) {
-  await db.query('UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ?, password_hash = ?, phone = ? WHERE id = ?', [user.role_id, user.first_name, user.last_name, user.email, user.password_hash || '', user.phone || null, id]);
+  await db.query(
+    'UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ?, password_hash = ?, phone = ? WHERE id = ?',
+    [user.role_id, user.first_name, user.last_name, user.email, user.password_hash, user.phone, id]
+  );
   return await findById(id);
 }
 

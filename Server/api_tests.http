@@ -81,7 +81,7 @@ Content-Type: application/json
 }
 
 ### Roles - delete (logical)
-DELETE {{host}}/api/roles/1
+DELETE {{host}}/api/roles/3
 
 ### Billiard Tables - list
 GET {{host}}/api/tables
@@ -92,8 +92,8 @@ Content-Type: application/json
 
 {
   "category_id": 1,
-  "code": "T-01",
-  "description": "Mesa junto a la ventana",
+  "code": "T-02",
+  "description": "Mesa junto a la puerta",
   "status": 1
 }
 
