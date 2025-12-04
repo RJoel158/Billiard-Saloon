@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const db = require("./src/db/db");
 require('dotenv').config(); // Cargar variables de entorno
 // routes will be required after schema init in startServer
@@ -15,6 +16,14 @@ const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+// Configurar CORS
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 

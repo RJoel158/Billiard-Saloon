@@ -7,10 +7,9 @@ interface RegisterProps {
 }
 
 export function Register({ onSwitch }: RegisterProps) {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -20,25 +19,24 @@ export function Register({ onSwitch }: RegisterProps) {
     setError('');
     setSuccess('');
 
-    if (password !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    if (!firstName || !lastName || !email) {
+      setError('Todos los campos son requeridos');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users', {
+      const response = await fetch('http://localhost:3000/api/auth/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ 
+          first_name: firstName, 
+          last_name: lastName, 
+          email 
+        }),
       });
 
       const data = await response.json();
@@ -48,15 +46,14 @@ export function Register({ onSwitch }: RegisterProps) {
         return;
       }
 
-      setSuccess('¡Registro exitoso! Inicia sesión');
-      setName('');
+      setSuccess('¡Registro exitoso! Revisa tu email para la contraseña temporal');
+      setFirstName('');
+      setLastName('');
       setEmail('');
-      setPassword('');
-      setConfirmPassword('');
 
       setTimeout(() => {
         onSwitch();
-      }, 2000);
+      }, 3000);
     } catch (err) {
       setError('Error de conexión con el servidor');
       console.error(err);
@@ -71,13 +68,25 @@ export function Register({ onSwitch }: RegisterProps) {
         <h2>Crear Cuenta</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">Nombre</label>
+            <label htmlFor="firstName">Nombre</label>
             <input
-              id="name"
+              id="firstName"
               type="text"
-              placeholder="Tu nombre completo"
-              value={name}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+              placeholder="Tu nombre"
+              value={firstName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setFirstName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="lastName">Apellido</label>
+            <input
+              id="lastName"
+              type="text"
+              placeholder="Tu apellido"
+              value={lastName}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setLastName(e.target.value)}
               required
             />
           </div>
@@ -90,30 +99,6 @@ export function Register({ onSwitch }: RegisterProps) {
               placeholder="tu@email.com"
               value={email}
               onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirmar Contraseña</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
               required
             />
           </div>
