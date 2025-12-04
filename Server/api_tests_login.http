@@ -1,0 +1,86 @@
+### Variables
+@host = http://localhost:3000
+@api = {{host}}/api
+
+### ====================================
+### AUTENTICACIÓN - LOGIN
+### ====================================
+
+### 1. Registrar nuevo usuario
+POST {{api}}/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "Juan",
+  "last_name": "Pérez",
+  "email": "juan.perez@example.com"
+}
+
+### 2. Login con credenciales
+POST {{api}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "password": "Password123!"
+}
+
+### 3. Renovar token con Refresh Token
+### (Reemplaza tu_refresh_token con el token obtenido del login)
+POST {{api}}/auth/refresh-token
+Content-Type: application/json
+
+{
+  "refreshToken": "tu_refresh_token"
+}
+
+### 4. Logout
+POST {{api}}/auth/logout
+Content-Type: application/json
+
+### 5. Cambiar contraseña temporal
+### (Requiere token de autenticación)
+POST {{api}}/auth/change-temporary-password
+Authorization: Bearer tu_token
+Content-Type: application/json
+
+{
+  "newPassword": "NuevaPassword123!",
+  "confirmPassword": "NuevaPassword123!"
+}
+
+### 6. Solicitar restablecimiento de contraseña
+POST {{api}}/auth/request-password-reset
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com"
+}
+
+### ====================================
+### USUARIOS - Rutas protegidas
+### ====================================
+
+### Obtener todos los usuarios (requiere token)
+GET {{api}}/users
+Authorization: Bearer tu_token
+
+### Obtener usuario por ID (requiere token)
+GET {{api}}/users/1
+Authorization: Bearer tu_token
+
+### Actualizar usuario (requiere token)
+PUT {{api}}/users/1
+Authorization: Bearer tu_token
+Content-Type: application/json
+
+{
+  "first_name": "Juan",
+  "last_name": "Pérez Actualizado",
+  "email": "juan.nuevo@example.com",
+  "phone": "1234567890"
+}
+
+### Eliminar usuario (requiere token)
+DELETE {{api}}/users/1
+Authorization: Bearer tu_token

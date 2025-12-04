@@ -11,6 +11,27 @@ const router = express.Router();
 router.post('/register', authController.register);
 
 /**
+ * POST /auth/login
+ * Login con email y contraseña
+ * Body: { email, password }
+ * Response: { token, refreshToken, user }
+ */
+router.post('/login', authController.login);
+
+/**
+ * POST /auth/refresh-token
+ * Renovar token usando refresh token
+ * Body: { refreshToken }
+ */
+router.post('/refresh-token', authController.refreshTokenEndpoint);
+
+/**
+ * POST /auth/logout
+ * Cerrar sesión
+ */
+router.post('/logout', authController.logout);
+
+/**
  * POST /auth/change-temporary-password
  * Cambiar contraseña temporal por una nueva (requiere autenticación)
  * Body: { newPassword, confirmPassword }

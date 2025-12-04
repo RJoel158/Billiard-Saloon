@@ -7,7 +7,7 @@ function _hasActive() {
 
 async function findById(id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
-  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users WHERE id = ?${extra}`, [id]);
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, password_hash, phone, created_at FROM users WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
