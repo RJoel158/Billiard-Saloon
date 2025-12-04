@@ -7,31 +7,31 @@ function _hasActive() {
 
 async function findById(id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
-  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE id = ?${extra}`, [id]);
+  const rows = await db.query(`SELECT id, session_id, amount, method, receipt_image, created_at FROM payments WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
 async function create(payment) {
-  await db.query('INSERT INTO payments (session_id, amount,method) VALUES (?, ?, ?)', [payment.session_id, payment.amount, payment.method]);
-  const rows = await db.query('SELECT id, session_id, amount, method, created_at FROM payments WHERE id = LAST_INSERT_ID()');
+  await db.query('INSERT INTO payments (session_id, amount, method, receipt_image) VALUES (?, ?, ?, ?)', [payment.session_id, payment.amount, payment.method, payment.receipt_image || null]);
+  const rows = await db.query('SELECT id, session_id, amount, method, receipt_image, created_at FROM payments WHERE id = LAST_INSERT_ID()');
   return rows[0] || null;
 }
 
 async function findAll() {
   const extra = _hasActive() ? ' WHERE is_active = 1' : '';
-  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments${extra} ORDER BY created_at DESC`);
+  const rows = await db.query(`SELECT id, session_id, amount, method, receipt_image, created_at FROM payments${extra} ORDER BY created_at DESC`);
   return rows;
 }
 
 async function findAllPaged(limit, offset) {
   const extra = _hasActive() ? ' WHERE is_active = 1' : '';
-  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments${extra} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]);
+  const rows = await db.query(`SELECT id, session_id, amount, method, receipt_image, created_at FROM payments${extra} ORDER BY created_at DESC LIMIT ? OFFSET ?`, [limit, offset]);
   return rows;
 }
 
 async function findBySession(session_id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
-  const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE session_id = ?${extra} ORDER BY created_at DESC`, [session_id]);
+  const rows = await db.query(`SELECT id, session_id, amount, method, receipt_image, created_at FROM payments WHERE session_id = ?${extra} ORDER BY created_at DESC`, [session_id]);
   return rows;
 }
 

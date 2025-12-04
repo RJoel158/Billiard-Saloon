@@ -1,0 +1,131 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard h2 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stat-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  flex-shrink: 0;
+}
+
+.stat-icon.active {
+  background: #4a90e2;
+  color: #ffffff;
+}
+
+.stat-icon.available {
+  background: #27ae60;
+  color: #ffffff;
+}
+
+.stat-icon.occupied {
+  background: #e74c3c;
+  color: #ffffff;
+}
+
+.stat-icon.pending {
+  background: #f39c12;
+  color: #ffffff;
+}
+
+.stat-icon.revenue {
+  background: #8e44ad;
+  color: #ffffff;
+}
+
+.stat-info {
+  flex: 1;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.dashboard-actions {
+  margin-top: 20px;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.action-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.action-link:hover {
+  background: #16a085;
+  color: white;
+  border-color: #16a085;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(22, 160, 133, 0.3);
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 16px;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+}

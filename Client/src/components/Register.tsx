@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Input, Button } from './ui';
 import '../styles/Auth.css';
 
 interface RegisterProps {
@@ -7,13 +8,17 @@ interface RegisterProps {
 }
 
 export function Register({ onSwitch }: RegisterProps) {
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  
+  const { register } = useAuth();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,33 +38,17 @@ export function Register({ onSwitch }: RegisterProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ name, email, password }),
+      await register({
+        first_name: firstName,
+        last_name: lastName,
+        email,
+        password,
+        phone: phone || undefined,
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al registrarse');
-        return;
-      }
-
-      setSuccess('¡Registro exitoso! Inicia sesión');
-      setName('');
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-
-      setTimeout(() => {
-        onSwitch();
-      }, 2000);
-    } catch (err) {
-      setError('Error de conexión con el servidor');
-      console.error(err);
+      
+      setSuccess('¡Registro exitoso!');
+    } catch (err: any) {
+      setError(err.message || 'Error al registrarse');
     } finally {
       setLoading(false);
     }
@@ -70,60 +59,65 @@ export function Register({ onSwitch }: RegisterProps) {
       <div className="auth-card">
         <h2>Crear Cuenta</h2>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Nombre</label>
-            <input
-              id="name"
-              type="text"
-              placeholder="Tu nombre completo"
-              value={name}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Nombre"
+            type="text"
+            placeholder="Tu nombre"
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
+            required
+          />
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Apellido"
+            type="text"
+            placeholder="Tu apellido"
+            value={lastName}
+            onChange={(e) => setLastName(e.target.value)}
+            required
+          />
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirmar Contraseña</label>
-            <input
-              id="confirmPassword"
-              type="password"
-              placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Teléfono (opcional)"
+            type="tel"
+            placeholder="+591 12345678"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+
+          <Input
+            label="Contraseña"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+
+          <Input
+            label="Confirmar Contraseña"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
 
           {error && <div className="error-message">{error}</div>}
           {success && <div className="success-message">{success}</div>}
 
-          <button type="submit" disabled={loading} className="auth-button">
+          <Button type="submit" disabled={loading} style={{ width: '100%' }}>
             {loading ? 'Registrando...' : 'Registrarse'}
-          </button>
+          </Button>
         </form>
 
         <p className="auth-switch">

@@ -9,6 +9,25 @@ async function getAll(req, res, next) {
   }
 }
 
+async function getPending(req, res, next) {
+  try {
+    const items = await service.getPendingReservations();
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getUserReservations(req, res, next) {
+  try {
+    const userId = req.user.id; // From auth middleware
+    const items = await service.getUserReservations(userId);
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getById(req, res, next) {
   try {
     const item = await service.getReservationById(req.params.id);
@@ -36,6 +55,24 @@ async function update(req, res, next) {
   }
 }
 
+async function confirm(req, res, next) {
+  try {
+    const item = await service.confirmReservation(req.params.id);
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function cancel(req, res, next) {
+  try {
+    const item = await service.cancelReservation(req.params.id);
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function deleteReservation(req, res, next) {
   try {
     await service.deleteReservation(req.params.id);
@@ -45,4 +82,14 @@ async function deleteReservation(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, create, update, deleteReservation };
+module.exports = { 
+  getAll, 
+  getPending, 
+  getUserReservations, 
+  getById, 
+  create, 
+  update, 
+  confirm, 
+  cancel, 
+  deleteReservation 
+};

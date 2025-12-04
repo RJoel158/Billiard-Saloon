@@ -9,6 +9,15 @@ async function getAll(req, res, next) {
   }
 }
 
+async function getActive(req, res, next) {
+  try {
+    const items = await service.getActiveSessions();
+    res.json(items);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function getById(req, res, next) {
   try {
     const item = await service.getSessionById(req.params.id);
@@ -36,6 +45,15 @@ async function update(req, res, next) {
   }
 }
 
+async function close(req, res, next) {
+  try {
+    const result = await service.closeSession(req.params.id, req.body.end_time);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+}
+
 async function deleteSession(req, res, next) {
   try {
     await service.deleteSession(req.params.id);
@@ -45,4 +63,4 @@ async function deleteSession(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, create, update, deleteSession };
+module.exports = { getAll, getActive, getById, create, update, close, deleteSession };

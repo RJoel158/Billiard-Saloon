@@ -32,6 +32,17 @@ async function findAll() {
   return rows;
 }
 
+async function searchByName(searchTerm) {
+  const extra = _hasActive() ? ' AND is_active = 1' : '';
+  const term = `%${searchTerm}%`;
+  const rows = await db.query(`
+    SELECT id, role_id, first_name, last_name, email, phone, created_at 
+    FROM users 
+    WHERE (first_name LIKE ? OR last_name LIKE ? OR CONCAT(first_name, ' ', last_name) LIKE ?)${extra}
+  `, [term, term, term]);
+  return rows;
+}
+
 async function update(id, user) {
   await db.query(
     'UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ?, password_hash = ?, phone = ? WHERE id = ?',
@@ -49,4 +60,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findById, findByEmail, create, findAll, update, deleteById };
+module.exports = { findById, findByEmail, create, findAll, searchByName, update, deleteById };

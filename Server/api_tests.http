@@ -1,4 +1,77 @@
 @host = http://localhost:3000
+@token = your-token-here
+
+### ========================================
+### AUTHENTICATION
+### ========================================
+
+### Register new user
+POST {{host}}/api/auth/register
+Content-Type: application/json
+
+{
+  "first_name": "Juan",
+  "last_name": "Pérez",
+  "email": "juan.perez@example.com",
+  "password": "password123",
+  "phone": "+591 12345678"
+}
+
+### Login
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "juan.perez@example.com",
+  "password": "password123"
+}
+
+### Get current user (requires auth)
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### ========================================
+### USERS
+### ========================================
+
+### Users - list
+GET {{host}}/api/users
+
+### Users - get by id
+GET {{host}}/api/users/1
+
+### Users - create
+POST {{host}}/api/users
+Content-Type: application/json
+
+{
+  "role_id": 2,
+  "first_name": "María",
+  "last_name": "González",
+  "email": "maria.gonzalez@example.com",
+  "password": "password123",
+  "phone": "+591 87654321"
+}
+
+### Users - update
+PUT {{host}}/api/users/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "first_name": "Juan Carlos",
+  "last_name": "Pérez",
+  "email": "juan.perez@example.com",
+  "phone": "+591 12345678"
+}
+
+### Users - delete (logical)
+DELETE {{host}}/api/users/1
+Authorization: Bearer {{token}}
+
+### ========================================
+### TABLE CATEGORIES
+### ========================================
 
 ### Table Categories - list
 GET {{host}}/api/table-categories
@@ -30,58 +103,9 @@ Content-Type: application/json
 ### Table Categories - delete (logical)
 DELETE {{host}}/api/table-categories/1
 
-### Table Categories - search (LIKE) & paged
-GET {{host}}/api/table-categories?search=Pool&limit=10&offset=0
-
-
-
-
-### Users - list
-GET {{host}}/api/users
-
-### Users - get by id
-GET {{host}}/api/users/1
-
-### Users - create
-POST {{host}}/api/users
-Content-Type: application/json
-
-{
-  "role_id": 2,
-  "first_name": "Juan",
-  "last_name": "Perez",
-  "email": "juan.perez@example.com",
-  "password_hash": "test-hash",
-  "phone": "+34123456789"
-}
-
-### Users - update
-PUT {{host}}/api/users/1
-Content-Type: application/json
-
-{
-  "first_name": "Juanito",
-  "last_name": "Perez",
-  "email": "juan.perez@example.com",
-  "phone": "+34123456700"
-}
-
-### Users - delete (logical)
-DELETE {{host}}/api/users/1
-
-### Roles - list
-GET {{host}}/api/roles
-
-### Roles - create
-POST {{host}}/api/roles
-Content-Type: application/json
-
-{
-  "name": "manager"
-}
-
-### Roles - delete (logical)
-DELETE {{host}}/api/roles/3
+### ========================================
+### BILLIARD TABLES
+### ========================================
 
 ### Billiard Tables - list
 GET {{host}}/api/tables
@@ -92,8 +116,8 @@ Content-Type: application/json
 
 {
   "category_id": 1,
-  "code": "T-02",
-  "description": "Mesa junto a la puerta",
+  "code": "T-01",
+  "description": "Mesa junto a la entrada",
   "status": 1
 }
 
@@ -108,33 +132,91 @@ Content-Type: application/json
   "status": 1
 }
 
-### Billiard Tables - delete (logical)
+### Billiard Tables - delete
 DELETE {{host}}/api/tables/1
+
+### ========================================
+### DYNAMIC PRICING
+### ========================================
 
 ### Dynamic Pricing - list
 GET {{host}}/api/dynamic-pricing
 
-### Dynamic Pricing - create
+### Dynamic Pricing - create (Peak Hour - Weekends)
 POST {{host}}/api/dynamic-pricing
 Content-Type: application/json
 
 {
   "category_id": 1,
   "type": 1,
-  "percentage": 20.00,
+  "percentage": 25.00,
   "time_start": "18:00:00",
-  "time_end": "22:00:00",
+  "time_end": "23:00:00",
   "weekday": 6,
-  "date_start": null,
-  "date_end": null,
+  "is_active": 1
+}
+
+### Dynamic Pricing - create (Weekend)
+POST {{host}}/api/dynamic-pricing
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "type": 2,
+  "percentage": 30.00,
+  "weekday": 7,
   "is_active": 1
 }
 
 ### Dynamic Pricing - delete (logical)
 DELETE {{host}}/api/dynamic-pricing/1
 
-### Reservations - list
+### ========================================
+### SESSIONS
+### ========================================
+
+### Sessions - list all
+GET {{host}}/api/sessions
+
+### Sessions - get active sessions
+GET {{host}}/api/sessions/active
+
+### Sessions - create (start new session)
+POST {{host}}/api/sessions
+Content-Type: application/json
+
+{
+  "user_id": 1,
+  "table_id": 1,
+  "start_time": "2025-12-03T20:00:00",
+  "session_type": 2,
+  "status": 1
+}
+
+### Sessions - close session (calculate price with dynamic pricing)
+POST {{host}}/api/sessions/1/close
+Content-Type: application/json
+
+{
+  "end_time": "2025-12-03T22:30:00"
+}
+
+### Sessions - delete (cancel)
+DELETE {{host}}/api/sessions/1
+
+### ========================================
+### RESERVATIONS
+### ========================================
+
+### Reservations - list all
 GET {{host}}/api/reservations
+
+### Reservations - get pending
+GET {{host}}/api/reservations/pending
+
+### Reservations - get my reservations (requires auth)
+GET {{host}}/api/reservations/my-reservations
+Authorization: Bearer {{token}}
 
 ### Reservations - create
 POST {{host}}/api/reservations
@@ -143,39 +225,28 @@ Content-Type: application/json
 {
   "user_id": 1,
   "table_id": 1,
-  "reservation_date": "2025-12-01T20:00:00",
-  "start_time": "2025-12-01T20:00:00",
-  "end_time": "2025-12-01T21:00:00"
+  "reservation_date": "2025-12-05T18:00:00",
+  "start_time": "2025-12-05T18:00:00",
+  "end_time": "2025-12-05T20:00:00"
 }
 
-### Reservations - delete (logical)
+### Reservations - confirm
+POST {{host}}/api/reservations/1/confirm
+
+### Reservations - cancel
+POST {{host}}/api/reservations/1/cancel
+
+### Reservations - delete
 DELETE {{host}}/api/reservations/1
 
-### Sessions - list
-GET {{host}}/api/sessions
-
-### Sessions - create
-POST {{host}}/api/sessions
-Content-Type: application/json
-
-{
-  "user_id": 1,
-  "reservation_id": null,
-  "table_id": 1,
-  "start_time": "2025-12-01T20:00:00",
-  "end_time": null,
-  "session_type": 2,
-  "final_cost": 0,
-  "status": 1
-}
-
-### Sessions - delete (logical)
-DELETE {{host}}/api/sessions/1
+### ========================================
+### PAYMENTS
+### ========================================
 
 ### Payments - list
 GET {{host}}/api/payments
 
-### Payments - create (transactional)
+### Payments - create (closes session automatically)
 POST {{host}}/api/payments
 Content-Type: application/json
 
@@ -187,3 +258,45 @@ Content-Type: application/json
 
 ### Payments - delete (logical)
 DELETE {{host}}/api/payments/1
+
+### ========================================
+### DASHBOARD (Admin only)
+### ========================================
+
+### Dashboard - get stats
+GET {{host}}/api/dashboard/stats
+Authorization: Bearer {{token}}
+
+### Dashboard - revenue report
+GET {{host}}/api/dashboard/revenue?startDate=2025-12-01&endDate=2025-12-31
+Authorization: Bearer {{token}}
+
+### Dashboard - table usage stats
+GET {{host}}/api/dashboard/table-usage
+Authorization: Bearer {{token}}
+
+### Dashboard - payment methods stats
+GET {{host}}/api/dashboard/payment-methods?startDate=2025-12-01&endDate=2025-12-31
+Authorization: Bearer {{token}}
+
+### Dashboard - peak hours analysis
+GET {{host}}/api/dashboard/peak-hours?date=2025-12-03
+Authorization: Bearer {{token}}
+
+### ========================================
+### ROLES
+### ========================================
+
+### Roles - list
+GET {{host}}/api/roles
+
+### Roles - create
+POST {{host}}/api/roles
+Content-Type: application/json
+
+{
+  "name": "manager"
+}
+
+### Roles - delete (logical)
+DELETE {{host}}/api/roles/3

@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import type { FormEvent, ChangeEvent } from 'react';
+import { useState, FormEvent } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import { Input, Button } from './ui';
 import '../styles/Auth.css';
 
 interface LoginProps {
@@ -11,6 +12,8 @@ export function Login({ onSwitch }: LoginProps) {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  
+  const { login } = useAuth();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -18,29 +21,9 @@ export function Login({ onSwitch }: LoginProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/v1/users/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-
-      console.log('Login exitoso:', data);
-    } catch (err) {
-      setError('Error de conexión con el servidor');
-      console.error(err);
+      await login(email, password);
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
     } finally {
       setLoading(false);
     }
@@ -51,35 +34,29 @@ export function Login({ onSwitch }: LoginProps) {
       <div className="auth-card">
         <h2>Iniciar Sesión</h2>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              placeholder="tu@email.com"
-              value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Email"
+            type="email"
+            placeholder="tu@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          <Input
+            label="Contraseña"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" disabled={loading} className="auth-button">
+          <Button type="submit" disabled={loading} style={{ width: '100%' }}>
             {loading ? 'Cargando...' : 'Entrar'}
-          </button>
+          </Button>
         </form>
 
         <p className="auth-switch">

@@ -1,0 +1,269 @@
+.close-session-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.session-summary {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.summary-item .label {
+  color: #7f8c8d;
+  font-weight: 600;
+}
+
+.summary-item .value {
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.penalties-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-header h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.penalty-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  background: #fff3cd;
+  border: 1px solid #f39c12;
+  border-radius: 8px;
+}
+
+.penalties-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.penalty-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #ffe0e0;
+  border: 1px solid #e74c3c;
+  border-radius: 6px;
+}
+
+.penalty-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.penalty-reason {
+  font-size: 14px;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.penalty-amount {
+  font-size: 16px;
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+.remove-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #e74c3c;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.remove-btn:hover {
+  background: #c0392b;
+  transform: scale(1.1);
+}
+
+.payment-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.payment-methods {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.method-option {
+  padding: 12px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.method-option input {
+  display: none;
+}
+
+.method-option:hover {
+  border-color: #16a085;
+  background: #f8f9fa;
+}
+
+.method-option.selected {
+  border-color: #16a085;
+  background: #e8f5f1;
+  color: #16a085;
+}
+
+.receipt-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.file-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upload-label {
+  display: inline-block;
+  padding: 12px 24px;
+  background: #16a085;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: center;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.upload-label:hover {
+  background: #138f75;
+  transform: translateY(-1px);
+}
+
+.image-preview {
+  max-width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+}
+
+.image-preview img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.pricing-summary {
+  padding: 16px;
+  background: #e8f5f1;
+  border: 2px solid #16a085;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.price-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 15px;
+  color: #2c3e50;
+}
+
+.price-item.total {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 2px solid #16a085;
+  font-size: 18px;
+  font-weight: 700;
+  color: #16a085;
+}
+
+.total-preview {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.total-label {
+  font-size: 13px;
+  color: #7f8c8d;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.total-value {
+  font-size: 28px;
+  color: #2c3e50;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.total-note {
+  font-size: 12px;
+  color: #7f8c8d;
+  font-style: italic;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .payment-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+  }
+}
