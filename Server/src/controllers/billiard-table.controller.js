@@ -1,9 +1,11 @@
 const service = require('../services/billiard-table.service');
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 async function getAll(req, res, next) {
   try {
-    const items = await service.getAllTables();
-    res.json(items);
+    const { page, limit, offset } = getPaginationParams(req.query);
+    const { tables, total } = await service.getAllTablesPaged(limit, offset);
+    res.json(formatPaginatedResponse(tables, total, page, limit));
   } catch (err) {
     next(err);
   }

@@ -4,6 +4,12 @@ async function getAllTables() {
   return await repository.findAll();
 }
 
+async function getAllTablesPaged(limit, offset) {
+  const tables = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { tables, total };
+}
+
 async function getTableById(id) {
   const t = await repository.findById(id);
   if (!t) throw new Error('Table not found');
@@ -26,4 +32,4 @@ async function deleteTable(id) {
   return await repository.deleteById(id);
 }
 
-module.exports = { getAllTables, getTableById, createTable, updateTable, deleteTable };
+module.exports = { getAllTables, getAllTablesPaged, getTableById, createTable, updateTable, deleteTable };

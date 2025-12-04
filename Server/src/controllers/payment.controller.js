@@ -1,9 +1,11 @@
 const paymentService = require('../services/payment.service');
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 async function list(req, res, next) {
   try {
-    const payments = await paymentService.getAllPayments();
-    res.json({ success: true, data: payments });
+    const { page, limit, offset } = getPaginationParams(req.query);
+    const { payments, total } = await paymentService.getAllPaymentsPaged(limit, offset);
+    res.json(formatPaginatedResponse(payments, total, page, limit));
   } catch (err) {
     next(err);
   }

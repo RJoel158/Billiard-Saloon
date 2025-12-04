@@ -4,6 +4,12 @@ async function getAllSessions() {
   return await repository.findAll();
 }
 
+async function getAllSessionsPaged(limit, offset) {
+  const sessions = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { sessions, total };
+}
+
 async function getSessionById(id) {
   const s = await repository.findById(id);
   if (!s) throw new Error('Session not found');
@@ -25,4 +31,4 @@ async function deleteSession(id) {
   return await repository.deleteById(id);
 }
 
-module.exports = { getAllSessions, getSessionById, createSession, updateSession, deleteSession };
+module.exports = { getAllSessions, getAllSessionsPaged, getSessionById, createSession, updateSession, deleteSession };

@@ -4,6 +4,12 @@ async function getAllReservations() {
   return await repository.findAll();
 }
 
+async function getAllReservationsPaged(limit, offset) {
+  const reservations = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { reservations, total };
+}
+
 async function getReservationById(id) {
   const r = await repository.findById(id);
   if (!r) throw new Error('Reservation not found');
@@ -28,4 +34,4 @@ async function deleteReservation(id) {
   return await repository.deleteById(id);
 }
 
-module.exports = { getAllReservations, getReservationById, createReservation, updateReservation, deleteReservation };
+module.exports = { getAllReservations, getAllReservationsPaged, getReservationById, createReservation, updateReservation, deleteReservation };

@@ -23,6 +23,12 @@ async function getAllUsers() {
   return await userRepo.findAll();
 }
 
+async function getAllUsersPaged(limit, offset) {
+  const users = await userRepo.findAllPaged(limit, offset);
+  const total = await userRepo.countTotal();
+  return { users, total };
+}
+
 async function updateUser(id, data) {
   const existing = await userRepo.findById(id);
   if (!existing) throw new ApiError(404, 'USER_NOT_FOUND', 'Usuario no encontrado');
@@ -37,4 +43,4 @@ async function deleteUser(id) {
   return true;
 }
 
-module.exports = { getUser, getUserByEmail, createUser, getAllUsers, updateUser, deleteUser };
+module.exports = { getUser, getUserByEmail, createUser, getAllUsers, getAllUsersPaged, updateUser, deleteUser };

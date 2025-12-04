@@ -5,6 +5,16 @@ async function findAll() {
   return rows;
 }
 
+async function findAllPaged(limit, offset) {
+  const rows = await db.query('SELECT id, category_id, code, description, status FROM billiard_tables ORDER BY id DESC LIMIT ? OFFSET ?', [limit, offset]);
+  return rows;
+}
+
+async function countTotal() {
+  const rows = await db.query('SELECT COUNT(*) as total FROM billiard_tables');
+  return rows[0]?.total || 0;
+}
+
 async function findById(id) {
   const rows = await db.query('SELECT id, category_id, code, description, status FROM billiard_tables WHERE id = ?', [id]);
   return rows[0] || null;
@@ -27,4 +37,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, create, update, deleteById };
+module.exports = { findAll, findAllPaged, countTotal, findById, create, update, deleteById };

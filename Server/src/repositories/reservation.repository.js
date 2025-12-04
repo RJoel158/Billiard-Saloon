@@ -5,6 +5,16 @@ async function findAll() {
   return rows;
 }
 
+async function findAllPaged(limit, offset) {
+  const rows = await db.query('SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations ORDER BY created_at DESC LIMIT ? OFFSET ?', [limit, offset]);
+  return rows;
+}
+
+async function countTotal() {
+  const rows = await db.query('SELECT COUNT(*) as total FROM reservations');
+  return rows[0]?.total || 0;
+}
+
 async function findById(id) {
   const rows = await db.query('SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations WHERE id = ?', [id]);
   return rows[0] || null;
@@ -27,4 +37,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, create, update, deleteById };
+module.exports = { findAll, findAllPaged, countTotal, findById, create, update, deleteById };

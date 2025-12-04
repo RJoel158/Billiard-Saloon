@@ -1,9 +1,11 @@
 const service = require('../services/dynamic-pricing.service');
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 async function getAll(req, res, next) {
   try {
-    const items = await service.getAllPricing();
-    res.json(items);
+    const { page, limit, offset } = getPaginationParams(req.query);
+    const { pricing, total } = await service.getAllPricingPaged(limit, offset);
+    res.json(formatPaginatedResponse(pricing, total, page, limit));
   } catch (err) {
     next(err);
   }

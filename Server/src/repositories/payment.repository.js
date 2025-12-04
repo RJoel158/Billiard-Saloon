@@ -29,6 +29,12 @@ async function findAllPaged(limit, offset) {
   return rows;
 }
 
+async function countTotal() {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT COUNT(*) as total FROM payments${extra}`);
+  return rows[0]?.total || 0;
+}
+
 async function findBySession(session_id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
   const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE session_id = ?${extra} ORDER BY created_at DESC`, [session_id]);
@@ -53,7 +59,7 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findById, create, findAll, findAllPaged, findBySession, update, deleteById };
+module.exports = { findById, create, findAll, findAllPaged, countTotal, findBySession, update, deleteById };
 
 
 

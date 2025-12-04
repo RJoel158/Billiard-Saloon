@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Auth.css';
 
 interface LoginProps {
@@ -7,6 +8,7 @@ interface LoginProps {
 }
 
 export function Login({ onSwitch }: LoginProps) {
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,28 +20,10 @@ export function Login({ onSwitch }: LoginProps) {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al iniciar sesión');
-        return;
-      }
-
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-
-      console.log('Login exitoso:', data);
-    } catch (err) {
-      setError('Error de conexión con el servidor');
+      await login(email, password);
+      // El AuthContext se encargará de actualizar el estado y redirigir
+    } catch (err: any) {
+      setError(err.message || 'Error al iniciar sesión');
       console.error(err);
     } finally {
       setLoading(false);

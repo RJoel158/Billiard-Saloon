@@ -1,0 +1,120 @@
+### Pruebas de Paginación - Endpoints GET
+
+# ========================================
+# USUARIOS (Users)
+# ========================================
+
+### Obtener usuarios - página 1 (default)
+GET http://localhost:3000/api/users
+
+### Obtener usuarios - página 2
+GET http://localhost:3000/api/users?page=2
+
+### Obtener usuarios - 20 por página
+GET http://localhost:3000/api/users?limit=20
+
+### Obtener usuarios - página 2 con 15 elementos
+GET http://localhost:3000/api/users?page=2&limit=15
+
+
+# ========================================
+# MESAS DE BILLAR (Billiard Tables)
+# ========================================
+
+### Obtener mesas - default
+GET http://localhost:3000/api/billiard-tables
+
+### Obtener mesas - página 2
+GET http://localhost:3000/api/billiard-tables?page=2
+
+### Obtener mesas - 25 por página
+GET http://localhost:3000/api/billiard-tables?limit=25
+
+
+# ========================================
+# RESERVACIONES (Reservations)
+# ========================================
+
+### Obtener reservaciones - default
+GET http://localhost:3000/api/reservations
+
+### Obtener reservaciones - página 3
+GET http://localhost:3000/api/reservations?page=3
+
+### Obtener reservaciones - 50 por página
+GET http://localhost:3000/api/reservations?limit=50
+
+
+# ========================================
+# SESIONES (Sessions)
+# ========================================
+
+### Obtener sesiones - default
+GET http://localhost:3000/api/sessions
+
+### Obtener sesiones - página 2 con 30 elementos
+GET http://localhost:3000/api/sessions?page=2&limit=30
+
+
+# ========================================
+# ROLES
+# ========================================
+
+### Obtener roles - default
+GET http://localhost:3000/api/roles
+
+### Obtener roles - página 1 con 5 elementos
+GET http://localhost:3000/api/roles?limit=5
+
+
+# ========================================
+# PRECIOS DINÁMICOS (Dynamic Pricing)
+# ========================================
+
+### Obtener precios - default
+GET http://localhost:3000/api/dynamic-pricing
+
+### Obtener precios - página 2
+GET http://localhost:3000/api/dynamic-pricing?page=2
+
+
+# ========================================
+# CATEGORÍAS DE MESA (Table Categories)
+# ========================================
+
+### Obtener categorías - default
+GET http://localhost:3000/api/table-categories
+
+### Obtener categorías - 15 por página
+GET http://localhost:3000/api/table-categories?limit=15
+
+
+# ========================================
+# PAGOS (Payments)
+# ========================================
+
+### Obtener pagos - default
+GET http://localhost:3000/api/payments
+
+### Obtener pagos - página 2 con 20 elementos
+GET http://localhost:3000/api/payments?page=2&limit=20
+
+
+# ========================================
+# PRUEBAS DE LÍMITES
+# ========================================
+
+### Límite mínimo (1)
+GET http://localhost:3000/api/users?limit=1
+
+### Límite máximo permitido (100)
+GET http://localhost:3000/api/users?limit=100
+
+### Límite excedido (se ajustará a 100)
+GET http://localhost:3000/api/users?limit=200
+
+### Página inválida (se ajustará a 1)
+GET http://localhost:3000/api/users?page=0
+
+### Página muy alta (sin errores, respuesta vacía)
+GET http://localhost:3000/api/users?page=999

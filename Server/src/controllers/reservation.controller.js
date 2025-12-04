@@ -1,9 +1,11 @@
 const service = require('../services/reservation.service');
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 async function getAll(req, res, next) {
   try {
-    const items = await service.getAllReservations();
-    res.json(items);
+    const { page, limit, offset } = getPaginationParams(req.query);
+    const { reservations, total } = await service.getAllReservationsPaged(limit, offset);
+    res.json(formatPaginatedResponse(reservations, total, page, limit));
   } catch (err) {
     next(err);
   }
