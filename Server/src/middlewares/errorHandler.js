@@ -7,10 +7,24 @@ function ApiError(statusCode, code, message) {
 
 function errorHandler(err, req, res, next) {
   if (err && err.isApiError) {
-    return res.status(err.statusCode).json({ success: false, error: { code: err.code, message: err.message } });
+    return res.status(err.statusCode).json({ 
+      success: false,
+      message: err.message,
+      error: { 
+        code: err.code, 
+        message: err.message 
+      } 
+    });
   }
-  console.error(err);
-  res.status(500).json({ success: false, error: { code: 'INTERNAL_ERROR', message: 'Error interno' } });
+  console.error('Unhandled error:', err);
+  res.status(500).json({ 
+    success: false,
+    message: 'Error interno del servidor',
+    error: { 
+      code: 'INTERNAL_ERROR', 
+      message: 'Error interno' 
+    } 
+  });
 }
 
 module.exports = { errorHandler, ApiError };

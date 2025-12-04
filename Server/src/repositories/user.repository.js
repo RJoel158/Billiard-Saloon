@@ -7,33 +7,49 @@ function _hasActive() {
 
 async function findById(id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
-  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, password_hash, phone, created_at FROM users WHERE id = ?${extra}`, [id]);
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, password_hash, phone, created_at, password_changed, reset_code, reset_code_expiry FROM users WHERE id = ?${extra}`, [id]);
   return rows[0] || null;
 }
 
 async function findByEmail(email) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
-  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email FROM users WHERE email = ?${extra}`, [email]);
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, password_changed FROM users WHERE email = ?${extra}`, [email]);
   return rows[0] || null;
 }
 
 async function create(user) {
   await db.query(
-    'INSERT INTO users (role_id, first_name, last_name, email, password_hash, phone) VALUES (?, ?, ?, ?, ?, ?)',
-    [user.role_id || 2, user.first_name, user.last_name, user.email, user.password_hash || '', user.phone || null]
+    'INSERT INTO users (role_id, first_name, last_name, email, password_hash, phone, password_changed) VALUES (?, ?, ?, ?, ?, ?, ?)',
+    [user.role_id || 2, user.first_name, user.last_name, user.email, user.password_hash || '', user.phone || null, user.password_changed || 0]
   );
-  const rows = await db.query('SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users WHERE id = LAST_INSERT_ID()');
+  const rows = await db.query('SELECT id, role_id, first_name, last_name, email, phone, created_at, password_changed FROM users WHERE id = LAST_INSERT_ID()');
   return rows[0] || null;
 }
 
 async function findAll() {
   const extra = _hasActive() ? ' WHERE is_active = 1' : '';
-  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at FROM users${extra}`);
+  const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at, password_changed FROM users${extra}`);
   return rows;
 }
 
 async function update(id, user) {
-  await db.query('UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ?, password_hash = ?, phone = ? WHERE id = ?', [user.role_id, user.first_name, user.last_name, user.email, user.password_hash || '', user.phone || null, id]);
+  const fields = [];
+  const values = [];
+  
+  if (user.role_id !== undefined) { fields.push('role_id = ?'); values.push(user.role_id); }
+  if (user.first_name !== undefined) { fields.push('first_name = ?'); values.push(user.first_name); }
+  if (user.last_name !== undefined) { fields.push('last_name = ?'); values.push(user.last_name); }
+  if (user.email !== undefined) { fields.push('email = ?'); values.push(user.email); }
+  if (user.password_hash !== undefined) { fields.push('password_hash = ?'); values.push(user.password_hash); }
+  if (user.phone !== undefined) { fields.push('phone = ?'); values.push(user.phone); }
+  if (user.password_changed !== undefined) { fields.push('password_changed = ?'); values.push(user.password_changed); }
+  if (user.reset_code !== undefined) { fields.push('reset_code = ?'); values.push(user.reset_code); }
+  if (user.reset_code_expiry !== undefined) { fields.push('reset_code_expiry = ?'); values.push(user.reset_code_expiry); }
+  
+  if (fields.length === 0) return await findById(id);
+  
+  values.push(id);
+  await db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
   return await findById(id);
 }
 

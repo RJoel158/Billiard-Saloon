@@ -77,32 +77,56 @@ async function sendWelcomeEmail(email, firstName, temporaryPassword) {
 }
 
 /**
- * Enviar email de restablecimiento de contraseña
+ * Enviar email de restablecimiento de contraseña con código
  * @param {string} email - Email del usuario
- * @param {string} resetToken - Token para restablecer contraseña
+ * @param {string} resetCode - Código de 6 dígitos para restablecer contraseña
  */
-async function sendPasswordResetEmail(email, resetToken) {
+async function sendPasswordResetEmail(email, resetCode) {
   try {
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    
     const mailOptions = {
       from: process.env.GMAIL_USER,
       to: email,
-      subject: 'Restablece tu contraseña - Billiard Saloon',
+      subject: 'Código de restablecimiento de contraseña - Billiard Saloon',
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #1a472a;">Restablecimiento de contraseña</h2>
-          <p>Recibimos una solicitud para restablecer tu contraseña.</p>
-          <p>
-            <a href="${resetLink}" 
-               style="background-color: #1a472a; color: white; padding: 12px 30px; 
-                      text-decoration: none; border-radius: 5px; display: inline-block;">
-              Restablecer contraseña
-            </a>
-          </p>
-          <p style="color: #666; font-size: 12px;">
-            Este enlace expirará en 1 hora. Si no solicitaste esto, ignora este correo.
-          </p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+          <div style="background-color: #1a472a; color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0;">🎱 Billiard Saloon</h1>
+            <p style="margin: 10px 0 0 0;">Restablecimiento de contraseña</p>
+          </div>
+          
+          <div style="background-color: white; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #1a472a; margin-top: 0;">Solicitud de restablecimiento</h2>
+            
+            <p style="color: #333; line-height: 1.6;">
+              Recibimos una solicitud para restablecer tu contraseña. 
+              Usa el siguiente código de verificación para continuar:
+            </p>
+            
+            <div style="background-color: #f9f9f9; border-left: 4px solid #1a472a; padding: 20px; margin: 20px 0; text-align: center;">
+              <p style="margin: 0; color: #666; font-size: 14px;"><strong>Tu código de verificación:</strong></p>
+              <p style="margin: 15px 0 0 0; color: #1a472a; font-size: 32px; font-weight: bold; letter-spacing: 5px; font-family: monospace;">
+                ${resetCode}
+              </p>
+            </div>
+            
+            <div style="background-color: #ffe8e8; border: 1px solid #ff6b6b; border-radius: 5px; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #c92a2a;">
+                <strong>⏱️ Importante:</strong> Este código expirará en 10 minutos. 
+                No compartas este código con nadie.
+              </p>
+            </div>
+            
+            <p style="color: #666; line-height: 1.6; margin: 20px 0;">
+              Si no solicitaste restablecer tu contraseña, por favor ignora este correo. 
+              Tu cuenta seguirá siendo segura.
+            </p>
+            
+            <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd;">
+              <p style="color: #999; font-size: 12px; margin: 0;">
+                © 2025 Billiard Saloon. Todos los derechos reservados.
+              </p>
+            </div>
+          </div>
         </div>
       `
     };

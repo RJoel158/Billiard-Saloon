@@ -173,6 +173,9 @@ CREATE TABLE `users` (
   `password_hash` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `created_at` datetime DEFAULT current_timestamp(),
+  `password_changed` tinyint(1) DEFAULT 0 COMMENT '0=primera vez (temporal), 1=ya cambió contraseña',
+  `reset_code` varchar(10) DEFAULT NULL COMMENT 'Código de 6 dígitos para resetear contraseña',
+  `reset_code_expiry` datetime DEFAULT NULL COMMENT 'Fecha/hora de expiración del código',
   `status` tinyint(20) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 

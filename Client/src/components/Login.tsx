@@ -4,9 +4,11 @@ import '../styles/Auth.css';
 
 interface LoginProps {
   onSwitch: () => void;
+  onForgotPassword?: () => void;
+  onLoginSuccess?: (email: string, password: string, requiresPasswordChange: boolean) => void;
 }
 
-export function Login({ onSwitch }: LoginProps) {
+export function Login({ onSwitch, onForgotPassword, onLoginSuccess }: LoginProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,11 +35,19 @@ export function Login({ onSwitch }: LoginProps) {
         return;
       }
 
-      if (data.token) {
-        localStorage.setItem('token', data.token);
+      if (data.data.token) {
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
       }
 
       console.log('Login exitoso:', data);
+      console.log('requiresPasswordChange:', data.data.requiresPasswordChange);
+      console.log('password_changed:', data.data.user.password_changed);
+
+      // Llamar callback si existe
+      if (onLoginSuccess) {
+        onLoginSuccess(email, password, data.data.requiresPasswordChange);
+      }
     } catch (err) {
       setError('Error de conexión con el servidor');
       console.error(err);
@@ -86,6 +96,13 @@ export function Login({ onSwitch }: LoginProps) {
           ¿No tienes cuenta?{' '}
           <button type="button" onClick={onSwitch} className="switch-button">
             Regístrate aquí
+          </button>
+        </p>
+
+        <p className="auth-switch">
+          ¿Olvidaste tu contraseña?{' '}
+          <button type="button" onClick={onForgotPassword} className="switch-button">
+            Recupérala aquí
           </button>
         </p>
       </div>
