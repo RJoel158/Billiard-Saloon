@@ -53,16 +53,17 @@ async function update(id, table) {
 }
 
 async function deleteById(id) {
-  // Physical delete: table has no is_active in schema, remove row
-  const result = await db.query("DELETE FROM billiard_tables WHERE id = ?", [
-    id,
-  ]);
+  // Logical delete: update status to 0
+  const result = await db.query(
+    "UPDATE billiard_tables SET status = 0 WHERE id = ?",
+    [id]
+  );
   return result.affectedRows > 0;
 }
 
 async function markAsOccupied(id) {
   const result = await db.query(
-    "UPDATE billiard_tables SET status = 3 WHERE id = ?",
+    "UPDATE billiard_tables SET status = 2 WHERE id = ?",
     [id]
   );
   return result.affectedRows > 0;
@@ -70,7 +71,7 @@ async function markAsOccupied(id) {
 
 async function markAsReserved(id) {
   const result = await db.query(
-    "UPDATE billiard_tables SET status = 4 WHERE id = ?",
+    "UPDATE billiard_tables SET status = 3 WHERE id = ?",
     [id]
   );
   return result.affectedRows > 0;

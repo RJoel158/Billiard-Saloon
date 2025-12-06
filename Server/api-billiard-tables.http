@@ -46,13 +46,13 @@ Content-Type: application/json
 }
 
 ### Eliminar mesa (borrado lógico según implementación)
-DELETE {{baseUrl}}/api/tables/1
+DELETE {{baseUrl}}/api/tables/3
 
-### Marcar mesa como ocupada (status = 3)
-PATCH {{baseUrl}}/api/tables/3/occupy
+### Marcar mesa como ocupada (status = 2)
+PATCH {{baseUrl}}/api/tables/1/occupy
 
-### Marcar mesa como reservada (status = 4)
-PATCH {{baseUrl}}/api/tables/3/reserve
+### Marcar mesa como reservada (status = 3)
+PATCH {{baseUrl}}/api/tables/1/reserve
 
 ### Buscar por código (ejemplo de query personalizado)
 GET {{baseUrl}}/api/tables?code=TBL-001
