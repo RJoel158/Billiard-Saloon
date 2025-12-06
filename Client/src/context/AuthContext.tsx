@@ -2,10 +2,9 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { ROLES } from '../types/auth.types';
 import type { User, AuthContextType, RegisterData, LoginResponse } from '../types/auth.types';
+import { authService } from '../services';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const API_URL = 'http://localhost:3000/api';
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -26,20 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al iniciar sesión');
-      }
-
-      const data: LoginResponse = await response.json();
+      const data: LoginResponse = await authService.login(email, password);
       
       setUser(data.data.user);
       setToken(data.data.token);
@@ -53,20 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (data: RegisterData) => {
     try {
-      const response = await fetch(`${API_URL}/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Error al registrarse');
-      }
-
-      const result: LoginResponse = await response.json();
+      const result: LoginResponse = await authService.register(data);
       
       setUser(result.data.user);
       setToken(result.data.token);

@@ -4,6 +4,11 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import { AdminLayout, type AdminViewType } from './layouts/AdminLayout';
 import { ClientLayout, type ClientViewType } from './layouts/ClientLayout';
 import { AdminDashboard } from './components/Admin/Dashboard';
+import { Tables } from './components/Admin/Tables';
+import { Sessions } from './components/Admin/Sessions';
+import { Payments } from './components/Admin/Payments';
+import { Reservations } from './components/Admin/Reservations';
+import { Revenue } from './components/Admin/Revenue';
 import { ClientInicio } from './components/Client/Inicio';
 import { ClientReservas } from './components/Client/Reservas';
 import { ClientHistorial } from './components/Client/Historial';
@@ -18,15 +23,15 @@ function AdminApp() {
       case 'dashboard':
         return <AdminDashboard />;
       case 'mesas':
-        return <div className="p-8"><h1 className="text-3xl font-bold">Mesas (En desarrollo)</h1></div>;
+        return <Tables />;
       case 'sesiones':
-        return <div className="p-8"><h1 className="text-3xl font-bold">Sesiones (En desarrollo)</h1></div>;
+        return <Sessions />;
       case 'pagos':
-        return <div className="p-8"><h1 className="text-3xl font-bold">Pagos (En desarrollo)</h1></div>;
+        return <Payments />;
       case 'reservas':
-        return <div className="p-8"><h1 className="text-3xl font-bold">Reservas (En desarrollo)</h1></div>;
+        return <Reservations />;
       case 'ganancias':
-        return <div className="p-8"><h1 className="text-3xl font-bold">Ganancias (En desarrollo)</h1></div>;
+        return <Revenue />;
       default:
         return <AdminDashboard />;
     }
