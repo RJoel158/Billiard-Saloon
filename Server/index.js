@@ -12,6 +12,7 @@ let dynamicPricingRoutes;
 let reservationRoutes;
 let sessionRoutes;
 let authRoutes;
+let systemSettingsRoutes;
 const { errorHandler } = require("./src/middlewares/errorHandler");
 
 const app = express();
@@ -71,6 +72,7 @@ async function startServer() {
   reservationRoutes = require("./src/routes/reservation.routes");
   sessionRoutes = require("./src/routes/session.routes");
   authRoutes = require("./src/routes/auth.routes");
+  systemSettingsRoutes = require("./src/routes/system-settings.routes");
 
   app.use("/api/table-categories", tableCategoryRoutes);
   app.use('/api/users', userRoutes);
@@ -81,6 +83,7 @@ async function startServer() {
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/sessions', sessionRoutes);
   app.use('/api/auth', authRoutes);
+  app.use('/api/settings', systemSettingsRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

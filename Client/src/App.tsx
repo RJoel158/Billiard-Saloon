@@ -5,10 +5,12 @@ import { AdminLayout, type AdminViewType } from './layouts/AdminLayout';
 import { ClientLayout, type ClientViewType } from './layouts/ClientLayout';
 import { AdminDashboard } from './components/Admin/Dashboard';
 import { Tables } from './components/Admin/Tables';
+import { ActiveSessions } from './components/Admin/ActiveSessions';
 import { Sessions } from './components/Admin/Sessions';
 import { Payments } from './components/Admin/Payments';
 import { Reservations } from './components/Admin/Reservations';
 import { Revenue } from './components/Admin/Revenue';
+import { SystemSettings } from './components/Admin/SystemSettings';
 import { ClientInicio } from './components/Client/Inicio';
 import { ClientReservas } from './components/Client/Reservas';
 import { ClientHistorial } from './components/Client/Historial';
@@ -24,6 +26,8 @@ function AdminApp() {
         return <AdminDashboard />;
       case 'mesas':
         return <Tables />;
+      case 'sesiones-activas':
+        return <ActiveSessions />;
       case 'sesiones':
         return <Sessions />;
       case 'pagos':
@@ -32,6 +36,8 @@ function AdminApp() {
         return <Reservations />;
       case 'ganancias':
         return <Revenue />;
+      case 'configuracion':
+        return <SystemSettings />;
       default:
         return <AdminDashboard />;
     }

@@ -10,6 +10,43 @@ async function findAllPaged(limit, offset) {
   return rows;
 }
 
+async function findActive() {
+  const rows = await db.query(`
+    SELECT 
+      s.id, s.user_id, s.reservation_id, s.table_id, s.start_time, s.end_time, 
+      s.session_type, s.final_cost, s.status,
+      u.id as u_id, u.first_name, u.last_name, u.email,
+      t.id as t_id, t.code as table_code
+    FROM sessions s
+    LEFT JOIN users u ON s.user_id = u.id
+    LEFT JOIN billiard_tables t ON s.table_id = t.id
+    WHERE s.status = 1
+    ORDER BY s.start_time DESC
+  `);
+  
+  return rows.map(row => ({
+    id: row.id,
+    user_id: row.user_id,
+    reservation_id: row.reservation_id,
+    table_id: row.table_id,
+    start_time: row.start_time,
+    end_time: row.end_time,
+    session_type: row.session_type,
+    final_cost: row.final_cost,
+    status: row.status,
+    user: row.first_name ? {
+      id: row.u_id,
+      first_name: row.first_name,
+      last_name: row.last_name,
+      email: row.email
+    } : null,
+    table: {
+      id: row.t_id,
+      code: row.table_code
+    }
+  }));
+}
+
 async function countTotal() {
   const rows = await db.query('SELECT COUNT(*) as total FROM sessions');
   return rows[0]?.total || 0;
@@ -37,4 +74,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findAllPaged, countTotal, findById, create, update, deleteById };
+module.exports = { findAll, findAllPaged, findActive, countTotal, findById, create, update, deleteById };

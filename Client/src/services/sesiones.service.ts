@@ -38,6 +38,12 @@ export interface UpdateSessionDto {
   status?: number;
 }
 
+export interface FinalizeSessionDto {
+  payment_method: number;
+  penalty_amount?: number;
+  penalty_reason?: string;
+}
+
 export const sesionesService = {
   // Obtener todas las sesiones
   getAll: async (page: number = 1, limit: number = 10) => {
@@ -51,6 +57,12 @@ export const sesionesService = {
       page: response.data.pagination?.currentPage || 1,
       limit: response.data.pagination?.itemsPerPage || limit
     };
+  },
+
+  // Obtener sesiones activas
+  getActive: async (): Promise<Session[]> => {
+    const response = await api.get<{ success: boolean; data: Session[] }>('/sessions/active');
+    return response.data.data || [];
   },
 
   // Obtener sesión por ID
@@ -71,12 +83,9 @@ export const sesionesService = {
     return response.data;
   },
 
-  // Finalizar sesión
-  finalize: async (id: number): Promise<Session> => {
-    const response = await api.put<Session>(`/sessions/${id}`, {
-      status: 2,
-      end_time: new Date().toISOString(),
-    });
+  // Finalizar sesión (con pago automático)
+  finalize: async (id: number, data?: FinalizeSessionDto): Promise<Session> => {
+    const response = await api.post<Session>(`/sessions/${id}/finalize`, data || {});
     return response.data;
   },
 

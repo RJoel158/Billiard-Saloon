@@ -1,9 +1,9 @@
 import type { ReactNode } from 'react';
-import { LayoutDashboard, Table2, Clock, CreditCard, Calendar, TrendingUp, LogOut, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Table2, Clock, CreditCard, Calendar, TrendingUp, LogOut, User, Menu, X, Settings } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 
-export type AdminViewType = 'dashboard' | 'mesas' | 'sesiones' | 'pagos' | 'reservas' | 'ganancias';
+export type AdminViewType = 'dashboard' | 'mesas' | 'sesiones-activas' | 'sesiones' | 'pagos' | 'reservas' | 'ganancias' | 'configuracion';
 
 interface AdminLayoutProps {
   children: ReactNode;
@@ -14,10 +14,12 @@ interface AdminLayoutProps {
 const menuItems = [
   { id: 'dashboard' as AdminViewType, label: 'Dashboard', icon: LayoutDashboard, employeeAccess: true },
   { id: 'mesas' as AdminViewType, label: 'Mesas', icon: Table2, employeeAccess: true },
+  { id: 'sesiones-activas' as AdminViewType, label: 'Sesiones Activas', icon: Clock, employeeAccess: true },
   { id: 'sesiones' as AdminViewType, label: 'Sesiones', icon: Clock, employeeAccess: true },
   { id: 'pagos' as AdminViewType, label: 'Pagos', icon: CreditCard, employeeAccess: true },
   { id: 'reservas' as AdminViewType, label: 'Reservas', icon: Calendar, employeeAccess: true },
   { id: 'ganancias' as AdminViewType, label: 'Ganancias', icon: TrendingUp, employeeAccess: false },
+  { id: 'configuracion' as AdminViewType, label: 'Configuración', icon: Settings, employeeAccess: false },
 ];
 
 export function AdminLayout({ children, currentView, onViewChange }: AdminLayoutProps) {
