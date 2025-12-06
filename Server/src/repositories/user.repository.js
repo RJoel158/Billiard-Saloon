@@ -66,50 +66,18 @@ async function countTotal() {
 }
 
 async function update(id, user) {
-  const fields = [];
-  const values = [];
-
-  if (user.role_id !== undefined) {
-    fields.push("role_id = ?");
-    values.push(user.role_id);
-  }
-  if (user.first_name !== undefined) {
-    fields.push("first_name = ?");
-    values.push(user.first_name);
-  }
-  if (user.last_name !== undefined) {
-    fields.push("last_name = ?");
-    values.push(user.last_name);
-  }
-  if (user.email !== undefined) {
-    fields.push("email = ?");
-    values.push(user.email);
-  }
-  if (user.password_hash !== undefined) {
-    fields.push("password_hash = ?");
-    values.push(user.password_hash);
-  }
-  if (user.phone !== undefined) {
-    fields.push("phone = ?");
-    values.push(user.phone);
-  }
-  if (user.password_changed !== undefined) {
-    fields.push("password_changed = ?");
-    values.push(user.password_changed);
-  }
-  if (user.reset_code !== undefined) {
-    fields.push("reset_code = ?");
-    values.push(user.reset_code);
-  }
-  if (user.reset_code_expiry !== undefined) {
-    fields.push("reset_code_expiry = ?");
-    values.push(user.reset_code_expiry);
-  }
-
-  if (fields.length === 0) return await findById(id);
-
-  values.push(id);
-  await db.query(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`, values);
+  await db.query(
+    "UPDATE users SET role_id = ?, first_name = ?, last_name = ?, email = ?, password_hash = ?, phone = ? WHERE id = ?",
+    [
+      user.role_id,
+      user.first_name,
+      user.last_name,
+      user.email,
+      user.password_hash,
+      user.phone,
+      id,
+    ]
+  );
   return await findById(id);
 }
 
