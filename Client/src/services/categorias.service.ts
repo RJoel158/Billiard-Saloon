@@ -11,11 +11,17 @@ export interface Categoria {
 
 export const categoriasService = {
   // Obtener todas las categorías
-  getAll: async (page: number = 1, limit: number = 100): Promise<PaginatedResponse<Categoria>> => {
+  getAll: async (page: number = 1, limit: number = 100) => {
     const response = await api.get<PaginatedResponse<Categoria>>('/table-categories', {
       params: { page, limit },
     });
-    return response.data;
+    return {
+      items: response.data.data || [],
+      totalPages: response.data.pagination?.totalPages || 1,
+      total: response.data.pagination?.totalItems || 0,
+      page: response.data.pagination?.currentPage || 1,
+      limit: response.data.pagination?.itemsPerPage || limit
+    };
   },
 
   // Obtener categoría por ID

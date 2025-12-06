@@ -29,11 +29,17 @@ export interface CreatePaymentDto {
 
 export const pagosService = {
   // Obtener todos los pagos
-  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<Payment>> => {
+  getAll: async (page: number = 1, limit: number = 10) => {
     const response = await api.get<PaginatedResponse<Payment>>('/payments', {
       params: { page, limit },
     });
-    return response.data;
+    return {
+      items: response.data.data || [],
+      totalPages: response.data.pagination?.totalPages || 1,
+      total: response.data.pagination?.totalItems || 0,
+      page: response.data.pagination?.currentPage || 1,
+      limit: response.data.pagination?.itemsPerPage || limit
+    };
   },
 
   // Obtener pago por ID

@@ -32,7 +32,7 @@ CREATE TABLE `billiard_tables` (
   `category_id` int(11) NOT NULL,
   `code` varchar(20) NOT NULL,
   `description` text DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '1=available,2=occupied,3=maintenance'
+  `status` tinyint(4) NOT NULL DEFAULT 1 COMMENT '0=inactive, 1=available,2=occupied,3=reserved'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------

@@ -40,11 +40,17 @@ export interface UpdateSessionDto {
 
 export const sesionesService = {
   // Obtener todas las sesiones
-  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<Session>> => {
+  getAll: async (page: number = 1, limit: number = 10) => {
     const response = await api.get<PaginatedResponse<Session>>('/sessions', {
       params: { page, limit },
     });
-    return response.data;
+    return {
+      items: response.data.data || [],
+      totalPages: response.data.pagination?.totalPages || 1,
+      total: response.data.pagination?.totalItems || 0,
+      page: response.data.pagination?.currentPage || 1,
+      limit: response.data.pagination?.itemsPerPage || limit
+    };
   },
 
   // Obtener sesión por ID

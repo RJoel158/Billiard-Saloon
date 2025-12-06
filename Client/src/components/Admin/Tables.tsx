@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Table2, Plus, Edit2, Trash2, Search, Filter, AlertCircle, CheckCircle, Wrench } from 'lucide-react';
 import { mesasService, categoriasService, type Mesa, type Categoria } from '../../services';
+import { Pagination } from '../Pagination';
 
 export function Tables() {
   const [tables, setTables] = useState<Mesa[]>([]);
@@ -253,31 +254,11 @@ export function Tables() {
               </div>
 
               {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="d-flex justify-content-center p-4 border-top">
-                  <nav>
-                    <ul className="pagination mb-0">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
-                          Anterior
-                        </button>
-                      </li>
-                      {[...Array(totalPages)].map((_, i) => (
-                        <li key={i} className={`page-item ${currentPage === i + 1 ? 'active' : ''}`}>
-                          <button className="page-link" onClick={() => setCurrentPage(i + 1)}>
-                            {i + 1}
-                          </button>
-                        </li>
-                      ))}
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
-                          Siguiente
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              )}
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
             </>
           )}
         </div>

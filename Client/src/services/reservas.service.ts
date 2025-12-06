@@ -49,11 +49,17 @@ export interface UpdateReservationDto {
 
 export const reservasService = {
   // Obtener todas las reservas
-  getAll: async (page: number = 1, limit: number = 10): Promise<PaginatedResponse<Reservation>> => {
+  getAll: async (page: number = 1, limit: number = 10) => {
     const response = await api.get<PaginatedResponse<Reservation>>('/reservations', {
       params: { page, limit },
     });
-    return response.data;
+    return {
+      items: response.data.data || [],
+      totalPages: response.data.pagination?.totalPages || 1,
+      total: response.data.pagination?.totalItems || 0,
+      page: response.data.pagination?.currentPage || 1,
+      limit: response.data.pagination?.itemsPerPage || limit
+    };
   },
 
   // Obtener reserva por ID
