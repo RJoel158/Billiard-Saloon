@@ -1,0 +1,64 @@
+@baseUrl = http://localhost:3000
+
+### Listar todas las mesas
+GET {{baseUrl}}/api/tables
+Accept: application/json
+
+### Listar mesas (paginado)
+# Ejemplo: limit=10, offset=0
+GET {{baseUrl}}/api/tables?limit=10&offset=0
+Accept: application/json
+
+### Obtener mesa por id
+GET {{baseUrl}}/api/tables/1
+Accept: application/json
+
+### Crear mesa (campos mínimos: category_id y code)
+POST {{baseUrl}}/api/tables
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "code": "TBL-001",
+  "name": "Mesa 1",
+  "description": "Mesa junto a la ventana",
+  "hourly_rate": 12.5
+}
+
+### Crear mesa (ejemplo mínimo)
+POST {{baseUrl}}/api/tables
+Content-Type: application/json
+
+{
+  "category_id": 2,
+  "code": "TBL-002"
+}
+
+### Actualizar mesa (reemplaza 1 por id real)
+PUT {{baseUrl}}/api/tables/1
+Content-Type: application/json
+
+{
+  "category_id": 1,
+  "code": "TBL-001",
+  "name": "Mesa 1 - Actualizada",
+  "hourly_rate": 15.0
+}
+
+### Eliminar mesa (borrado lógico según implementación)
+DELETE {{baseUrl}}/api/tables/1
+
+### Marcar mesa como ocupada (status = 3)
+PATCH {{baseUrl}}/api/tables/3/occupy
+
+### Marcar mesa como reservada (status = 4)
+PATCH {{baseUrl}}/api/tables/3/reserve
+
+### Buscar por código (ejemplo de query personalizado)
+GET {{baseUrl}}/api/tables?code=TBL-001
+Accept: application/json
+
+### Notas
+# - Selecciona el entorno en REST Client para que {{baseUrl}} esté definido (p. ej. http://localhost:3000).
+# - Ajusta los ids y los valores del body según los datos de tu BD.
+# - Si tu API requiere autenticación, añade un header `Authorization: Bearer <token>` en los bloques que necesiten auth.

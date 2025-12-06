@@ -1,5 +1,8 @@
-const service = require('../services/billiard-table.service');
-const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
+const service = require("../services/billiard-table.service");
+const {
+  getPaginationParams,
+  formatPaginatedResponse,
+} = require("../utils/pagination");
 
 async function getAll(req, res, next) {
   try {
@@ -47,4 +50,30 @@ async function deleteTable(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, create, update, deleteTable };
+async function markAsOccupied(req, res, next) {
+  try {
+    const item = await service.markTableAsOccupied(req.params.id);
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function markAsReserved(req, res, next) {
+  try {
+    const item = await service.markTableAsReserved(req.params.id);
+    res.json(item);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = {
+  getAll,
+  getById,
+  create,
+  update,
+  deleteTable,
+  markAsOccupied,
+  markAsReserved,
+};
