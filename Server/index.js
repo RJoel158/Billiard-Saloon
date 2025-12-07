@@ -1,7 +1,6 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./src/db/db");
-require('dotenv').config(); // Cargar variables de entorno
 // routes will be required after schema init in startServer
 let tableCategoryRoutes;
 let userRoutes;
@@ -26,6 +25,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
 // Montar rutas (se harán después de inicializar el esquema en startServer)
@@ -63,6 +64,7 @@ async function startServer() {
   }
 
   // Now require and mount routes
+  authRoutes = require("./src/routes/auth.routes");
   tableCategoryRoutes = require("./src/routes/table-category.routes");
   userRoutes = require("./src/routes/user.routes");
   paymentRoutes = require("./src/routes/payment.routes");
@@ -71,9 +73,9 @@ async function startServer() {
   dynamicPricingRoutes = require("./src/routes/dynamic-pricing.routes");
   reservationRoutes = require("./src/routes/reservation.routes");
   sessionRoutes = require("./src/routes/session.routes");
-  authRoutes = require("./src/routes/auth.routes");
   systemSettingsRoutes = require("./src/routes/system-settings.routes");
 
+  app.use("/api/auth", authRoutes);
   app.use("/api/table-categories", tableCategoryRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/payments', paymentRoutes);
@@ -82,7 +84,6 @@ async function startServer() {
   app.use('/api/dynamic-pricing', dynamicPricingRoutes);
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/sessions', sessionRoutes);
-  app.use('/api/auth', authRoutes);
   app.use('/api/settings', systemSettingsRoutes);
 
   app.listen(PORT, () => {

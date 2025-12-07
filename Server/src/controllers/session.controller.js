@@ -65,4 +65,32 @@ async function deleteSession(req, res, next) {
   }
 }
 
-module.exports = { getAll, getActive, getById, create, update, finalize, deleteSession };
+async function start(req, res, next) {
+  try {
+    const session = await service.startSession(req.body);
+    res.status(201).json({ success: true, data: session, message: 'Sesión iniciada correctamente' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function end(req, res, next) {
+  try {
+    const session = await service.endSession(req.params.id);
+    res.json({ success: true, data: session, message: 'Sesión finalizada correctamente' });
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { 
+  getAll, 
+  getActive, 
+  getById, 
+  create, 
+  update, 
+  finalize, 
+  deleteSession,
+  start,
+  end
+};
