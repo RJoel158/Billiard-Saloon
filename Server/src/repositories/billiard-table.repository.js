@@ -31,10 +31,15 @@ async function update(id, table) {
   return await findById(id);
 }
 
+async function updateStatus(id, status) {
+  await db.query('UPDATE billiard_tables SET status = ? WHERE id = ?', [status, id]);
+  return await findById(id);
+}
+
 async function deleteById(id) {
   // Physical delete: table has no is_active in schema, remove row
   const result = await db.query('DELETE FROM billiard_tables WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findAllPaged, countTotal, findById, create, update, deleteById };
+module.exports = { findAll, findAllPaged, countTotal, findById, create, update, updateStatus, deleteById };

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { reservasService, type Reservation } from '../../services';
 import { Pagination } from '../Pagination';
+import { useSystemSettings } from '../../hooks/useSystemSettings';
 
 export function Reservations() {
+  const { settings } = useSystemSettings();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,9 +77,61 @@ export function Reservations() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!settings) {
+      alert('Cargando configuración del sistema...');
+      return;
+    }
+
     try {
       const reservationDate = new Date(formData.reservation_date);
       const durationHours = Number(formData.duration_hours);
+      const dayOfWeek = reservationDate.getDay() === 0 ? 7 : reservationDate.getDay();
+      const hour = reservationDate.getHours();
+      const minute = reservationDate.getMinutes();
+      const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+
+      // Validar día laborable
+      if (!settings.business_days.includes(dayOfWeek)) {
+        const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        alert(`El día ${dayNames[reservationDate.getDay()]} no es un día laborable del negocio.`);
+        return;
+      }
+
+      // Validar horario de atención
+      if (timeString < settings.opening_time || timeString > settings.closing_time) {
+        alert(`La reserva debe estar dentro del horario de atención: ${settings.opening_time} - ${settings.closing_time}`);
+        return;
+      }
+
+      // Validar duración mínima
+      const durationMinutes = durationHours * 60;
+      if (durationMinutes < settings.min_reservation_duration) {
+        alert(`La duración mínima de reserva es ${settings.min_reservation_duration} minutos (${settings.min_reservation_duration / 60} horas).`);
+        return;
+      }
+
+      // Validar duración máxima
+      if (durationMinutes > settings.max_reservation_duration) {
+        alert(`La duración máxima de reserva es ${settings.max_reservation_duration} minutos (${settings.max_reservation_duration / 60} horas).`);
+        return;
+      }
+
+      // Validar tiempo de anticipación mínimo
+      const now = new Date();
+      const hoursInAdvance = (reservationDate.getTime() - now.getTime()) / (1000 * 60 * 60);
+      if (hoursInAdvance < settings.min_advance_hours) {
+        alert(`Las reservas deben hacerse con al menos ${settings.min_advance_hours} horas de anticipación.`);
+        return;
+      }
+
+      // Validar tiempo de anticipación máximo
+      const daysInAdvance = hoursInAdvance / 24;
+      if (daysInAdvance > settings.max_advance_days) {
+        alert(`Las reservas no pueden hacerse con más de ${settings.max_advance_days} días de anticipación.`);
+        return;
+      }
+
       const endTime = new Date(reservationDate.getTime() + durationHours * 60 * 60 * 1000);
 
       if (editingId) {
@@ -408,6 +462,17 @@ export function Reservations() {
               </div>
               <form onSubmit={handleSubmit}>
                 <div className="modal-body">
+                  {settings && (
+                    <div className="alert alert-info mb-3">
+                      <small>
+                        <strong>Restricciones:</strong><br/>
+                        • Horario: {settings.opening_time} - {settings.closing_time}<br/>
+                        • Duración: {settings.min_reservation_duration / 60}h - {settings.max_reservation_duration / 60}h<br/>
+                        • Anticipación: {settings.min_advance_hours}h - {settings.max_advance_days} días<br/>
+                        • Días laborables: {settings.business_days.map(d => ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'][d === 7 ? 0 : d]).join(', ')}
+                      </small>
+                    </div>
+                  )}
                   <div className="mb-3">
                     <label className="form-label">ID Usuario</label>
                     <input
@@ -437,17 +502,25 @@ export function Reservations() {
                       onChange={(e) => setFormData({ ...formData, reservation_date: e.target.value })}
                       required
                     />
+                    {settings && (
+                      <small className="text-muted">Horario de atención: {settings.opening_time} - {settings.closing_time}</small>
+                    )}
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Duración (horas)</label>
                     <input
                       type="number"
                       step="0.5"
+                      min={settings ? settings.min_reservation_duration / 60 : 0.5}
+                      max={settings ? settings.max_reservation_duration / 60 : 24}
                       className="form-control"
                       value={formData.duration_hours}
                       onChange={(e) => setFormData({ ...formData, duration_hours: e.target.value })}
                       required
                     />
+                    {settings && (
+                      <small className="text-muted">Mín: {settings.min_reservation_duration / 60}h - Máx: {settings.max_reservation_duration / 60}h</small>
+                    )}
                   </div>
                   <div className="mb-3">
                     <label className="form-label">Notas</label>

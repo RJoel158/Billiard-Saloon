@@ -1,16 +1,23 @@
-import { useEffect, useState } from 'react';
-import { Play, Square, Clock, DollarSign, User } from 'lucide-react';
+import { useEffect, useState, useRef } from 'react';
+import { Play, Square, Clock, DollarSign } from 'lucide-react';
 import { mesasService, sesionesService, type Mesa, type Session } from '../../services';
+import { useToast } from '../../hooks/useToast';
 
 export function ActiveSessions() {
+  const { showToast, ToastComponent } = useToast();
   const [tables, setTables] = useState<Mesa[]>([]);
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Refs para mantener valores actualizados sin recrear el timer
+  const activeSessionsRef = useRef<Session[]>([]);
+  const tablesRef = useRef<Mesa[]>([]);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Mesa | null>(null);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [elapsedTimes, setElapsedTimes] = useState<{ [key: number]: string }>({});
+  const [currentCosts, setCurrentCosts] = useState<{ [key: number]: number }>({});
 
   // Form data para iniciar sesión
   const [startFormData, setStartFormData] = useState({
@@ -26,26 +33,42 @@ export function ActiveSessions() {
     penalty_reason: '',
   });
 
-  useEffect(() => {
-    fetchData();
-    const interval = setInterval(fetchData, 5000); // Actualizar cada 5 segundos
-    return () => clearInterval(interval);
-  }, []);
+  // Funciones de cálculo (declaradas antes de los useEffect que las usan)
+  const calculateElapsedTime = (startTime: string): string => {
+    // Parsear fecha de la DB (formato: YYYY-MM-DD HH:MM:SS)
+    let start: Date;
+    if (startTime.includes('T')) {
+      start = new Date(startTime);
+    } else {
+      // Formato de MySQL: 2024-12-07 14:30:00
+      const [datePart, timePart] = startTime.split(' ');
+      start = new Date(`${datePart}T${timePart}`);
+    }
+    
+    const now = new Date();
+    const diff = Math.max(0, now.getTime() - start.getTime()); // Prevenir negativos
+    
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  };
 
-  // Actualizar tiempos transcurridos cada segundo
-  useEffect(() => {
-    const timer = setInterval(() => {
-      const newTimes: { [key: number]: string } = {};
-      activeSessions.forEach((session) => {
-        if (session.status === 1) {
-          newTimes[session.id] = calculateElapsedTime(session.start_time);
-        }
-      });
-      setElapsedTimes(newTimes);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [activeSessions]);
+  const calculateCost = (startTime: string, pricePerHour: number): number => {
+    let start: Date;
+    if (startTime.includes('T')) {
+      start = new Date(startTime);
+    } else {
+      const [datePart, timePart] = startTime.split(' ');
+      start = new Date(`${datePart}T${timePart}`);
+    }
+    
+    const now = new Date();
+    const diff = Math.max(0, now.getTime() - start.getTime());
+    const hours = diff / (1000 * 60 * 60);
+    return Number((hours * pricePerHour).toFixed(2));
+  };
 
   const fetchData = async () => {
     try {
@@ -63,25 +86,44 @@ export function ActiveSessions() {
     }
   };
 
-  const calculateElapsedTime = (startTime: string): string => {
-    const start = new Date(startTime);
-    const now = new Date();
-    const diff = now.getTime() - start.getTime();
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  };
+  // Actualizar refs cuando cambian los estados
+  useEffect(() => {
+    activeSessionsRef.current = activeSessions;
+    tablesRef.current = tables;
+  }, [activeSessions, tables]);
 
-  const calculateCost = (startTime: string, pricePerHour: number): number => {
-    const start = new Date(startTime);
-    const now = new Date();
-    const diff = now.getTime() - start.getTime();
-    const hours = diff / (1000 * 60 * 60);
-    return Number((hours * pricePerHour).toFixed(2));
-  };
+  // Cargar datos iniciales y cada 30 segundos
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Timer que corre cada segundo
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const currentSessions = activeSessionsRef.current;
+      const currentTables = tablesRef.current;
+      
+      const newTimes: { [key: number]: string } = {};
+      const newCosts: { [key: number]: number } = {};
+      
+      currentSessions.forEach((session) => {
+        if (session.status === 1) {
+          newTimes[session.id] = calculateElapsedTime(session.start_time);
+          
+          const table = currentTables.find(t => t.id === session.table_id);
+          const pricePerHour = table?.category?.base_price || 0;
+          newCosts[session.id] = calculateCost(session.start_time, pricePerHour);
+        }
+      });
+      
+      setElapsedTimes(newTimes);
+      setCurrentCosts(newCosts);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []); // Sin dependencias - las funciones están disponibles
 
   const getTableSession = (tableId: number): Session | undefined => {
     return activeSessions.find((s) => s.table_id === tableId && s.status === 1);
@@ -121,9 +163,10 @@ export function ActiveSessions() {
       });
       setShowStartModal(false);
       fetchData();
-    } catch (error) {
+      showToast('Sesión iniciada correctamente', 'success');
+    } catch (error: any) {
       console.error('Error starting session:', error);
-      alert('Error al iniciar la sesión');
+      showToast(error.response?.data?.error || 'Error al iniciar la sesión', 'error');
     }
   };
 
@@ -132,7 +175,9 @@ export function ActiveSessions() {
     if (!selectedSession) return;
 
     try {
-      const penalty = endFormData.apply_penalty ? Number(endFormData.penalty_amount) : 0;
+      const penalty = endFormData.apply_penalty && endFormData.penalty_amount 
+        ? Number(endFormData.penalty_amount) 
+        : 0;
       
       await sesionesService.finalize(selectedSession.id, {
         payment_method: Number(endFormData.payment_method),
@@ -142,9 +187,10 @@ export function ActiveSessions() {
       
       setShowEndModal(false);
       fetchData();
-    } catch (error) {
+      showToast('Sesión finalizada y pago registrado', 'success');
+    } catch (error: any) {
       console.error('Error ending session:', error);
-      alert('Error al finalizar la sesión');
+      showToast(error.response?.data?.error || 'Error al finalizar la sesión', 'error');
     }
   };
 
@@ -163,7 +209,9 @@ export function ActiveSessions() {
   };
 
   return (
-    <div className="container-fluid p-4" style={{ background: '#f0f2f5', minHeight: '100vh' }}>
+    <>
+      {ToastComponent}
+      <div className="container-fluid p-4" style={{ background: '#f0f2f5', minHeight: '100vh' }}>
       {/* Header */}
       <div className="mb-4">
         <div className="d-flex justify-content-between align-items-center">
@@ -194,8 +242,7 @@ export function ActiveSessions() {
             const session = getTableSession(table.id);
             const isActive = !!session;
             const statusColor = getStatusColor(table);
-            const pricePerHour = table.category?.base_price || 0;
-            const currentCost = session ? calculateCost(session.start_time, pricePerHour) : 0;
+            const currentCost = session ? (currentCosts[session.id] || 0) : 0;
 
             return (
               <div key={table.id} className="col-md-6 col-lg-4">
@@ -241,9 +288,9 @@ export function ActiveSessions() {
                         <div className="p-3 mb-3 rounded" style={{ background: '#1e3a8a', color: 'white' }}>
                           <small className="d-block mb-1 opacity-75">Monto actual</small>
                           <div className="fs-4 fw-bold">
-                            ${currentCost.toFixed(3)}
+                            Bs {currentCost.toFixed(2)}
                           </div>
-                          <small className="opacity-75">${pricePerHour}/hora</small>
+                          <small className="opacity-75">Bs {(table.category?.base_price || 0).toFixed(2)}/hora</small>
                         </div>
 
                         {/* End Session Button */}
@@ -351,27 +398,31 @@ export function ActiveSessions() {
                       </div>
                       <div className="text-end">
                         <small className="d-block opacity-75">Tarifa:</small>
-                        <strong>${tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0}/hora</strong>
+                        <strong>Bs {(tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0).toFixed(2)}/hora</strong>
                       </div>
                     </div>
                     <hr className="my-2 opacity-25" />
                     <div className="d-flex justify-content-between">
-                      <span className="text-warning">Monto Base:</span>
+                      <span className="text-warning">Subtotal:</span>
                       <strong className="text-warning">
-                        ${calculateCost(selectedSession.start_time, tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0).toFixed(3)}
+                        Bs {calculateCost(selectedSession.start_time, tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0).toFixed(2)}
                       </strong>
                     </div>
                     {endFormData.apply_penalty && (
                       <div className="d-flex justify-content-between text-danger">
-                        <span>Multa:</span>
-                        <strong>${endFormData.penalty_amount || 0}</strong>
+                        <span>Penalización:</span>
+                        <strong>Bs {Number(endFormData.penalty_amount || 0).toFixed(2)}</strong>
                       </div>
                     )}
                     <hr className="my-2 opacity-25" />
                     <div className="d-flex justify-content-between fs-5">
-                      <span className="text-warning">Total:</span>
+                      <span className="text-warning">Total a Cobrar:</span>
                       <strong className="text-warning">
-                        ${(calculateCost(selectedSession.start_time, tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0) + Number(endFormData.apply_penalty ? endFormData.penalty_amount || 0 : 0)).toFixed(3)}
+                        Bs {(() => {
+                          const baseCost = calculateCost(selectedSession.start_time, tables.find(t => t.id === selectedSession.table_id)?.category?.base_price || 0);
+                          const penalty = endFormData.apply_penalty ? Number(endFormData.penalty_amount || 0) : 0;
+                          return (baseCost + penalty).toFixed(2);
+                        })()}
                       </strong>
                     </div>
                   </div>
@@ -447,5 +498,6 @@ export function ActiveSessions() {
         </div>
       )}
     </div>
+    </>
   );
 }

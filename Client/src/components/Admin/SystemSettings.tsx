@@ -77,6 +77,68 @@ export function SystemSettings() {
   const renderField = (setting: SystemSetting) => {
     const value = formData[setting.key] ?? setting.value;
 
+    // Días de la semana con checkboxes
+    if (setting.key === 'business_days') {
+      const days = [
+        { id: 1, label: 'Lunes' },
+        { id: 2, label: 'Martes' },
+        { id: 3, label: 'Miércoles' },
+        { id: 4, label: 'Jueves' },
+        { id: 5, label: 'Viernes' },
+        { id: 6, label: 'Sábado' },
+        { id: 7, label: 'Domingo' }
+      ];
+      
+      let selectedDays: number[] = [];
+      try {
+        if (Array.isArray(value)) {
+          selectedDays = value;
+        } else if (typeof value === 'string' && value.trim()) {
+          // Limpiar el string antes de parsear
+          const cleanValue = value.trim();
+          if (cleanValue.startsWith('[') && cleanValue.endsWith(']')) {
+            selectedDays = JSON.parse(cleanValue);
+          } else {
+            selectedDays = [1, 2, 3, 4, 5, 6, 7];
+          }
+        } else {
+          selectedDays = [1, 2, 3, 4, 5, 6, 7];
+        }
+      } catch (e) {
+        console.error('Error parsing business_days:', e);
+        selectedDays = [1, 2, 3, 4, 5, 6, 7]; // Default: todos los días
+      }
+      
+      return (
+        <div className="mb-3">
+          <label className="form-label fw-semibold">{setting.description}</label>
+          <div className="row g-2">
+            {days.map(day => (
+              <div key={day.id} className="col-md-6">
+                <div className="form-check">
+                  <input
+                    className="form-check-input"
+                    type="checkbox"
+                    id={`day-${day.id}`}
+                    checked={selectedDays.includes(day.id)}
+                    onChange={(e) => {
+                      const newDays = e.target.checked
+                        ? [...selectedDays, day.id].sort()
+                        : selectedDays.filter((d: number) => d !== day.id);
+                      handleChange(setting.key, newDays);
+                    }}
+                  />
+                  <label className="form-check-label" htmlFor={`day-${day.id}`}>
+                    {day.label}
+                  </label>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
     switch (setting.type) {
       case 'boolean':
         return (
@@ -137,16 +199,25 @@ export function SystemSettings() {
   };
 
   const scheduleSettings = settings.filter(s => 
-    s.key.includes('opening_') || s.key.includes('closing_') || s.key.includes('business_days')
+    s.key.includes('business_days')
   );
+
+  const timeSettings = settings.filter(s => 
+    s.key.includes('opening_') || s.key.includes('closing_')
+  ).sort((a, b) => {
+    // Ordenar: opening_time primero, closing_time después
+    if (a.key.includes('opening_')) return -1;
+    if (b.key.includes('opening_')) return 1;
+    return 0;
+  });
 
   const reservationSettings = settings.filter(s => 
     s.key.includes('reservation_') || s.key.includes('cancellation_') || s.key.includes('max_concurrent')
   );
 
   const pricingSettings = settings.filter(s => 
-    s.key.includes('penalty') || s.key.includes('overtime') || s.key.includes('tax_') || 
-    s.key.includes('grace_') || s.key.includes('currency')
+    s.key.includes('penalty') || s.key.includes('overtime') || 
+    s.key.includes('grace_') || s.key.includes('currency') || s.key.includes('hourly_rate')
   );
 
   const businessSettings = settings.filter(s => 
@@ -238,13 +309,25 @@ export function SystemSettings() {
                       <Clock size={24} className="me-2" />
                       Configuración de Horarios
                     </h4>
-                    <div className="row">
-                      {scheduleSettings.map(setting => (
+                    
+                    {/* Horarios de Apertura y Cierre */}
+                    <div className="row mb-4">
+                      {timeSettings.map(setting => (
                         <div key={setting.key} className="col-md-6">
                           {renderField(setting)}
                         </div>
                       ))}
                     </div>
+
+                    {/* Días laborables */}
+                    <div className="row">
+                      {scheduleSettings.map(setting => (
+                        <div key={setting.key} className="col-12">
+                          {renderField(setting)}
+                        </div>
+                      ))}
+                    </div>
+                    
                     <div className="alert alert-info mt-3">
                       <strong>Nota:</strong> El horario de atención limita las reservas y sesiones a estos tiempos.
                     </div>
