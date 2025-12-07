@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { Play, Square, Clock, DollarSign } from 'lucide-react';
 import { mesasService, sesionesService, type Mesa, type Session } from '../../services';
 import { useToast } from '../../hooks/useToast';
@@ -8,10 +8,6 @@ export function ActiveSessions() {
   const [tables, setTables] = useState<Mesa[]>([]);
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  // Refs para mantener valores actualizados sin recrear el timer
-  const activeSessionsRef = useRef<Session[]>([]);
-  const tablesRef = useRef<Mesa[]>([]);
   const [showStartModal, setShowStartModal] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Mesa | null>(null);
@@ -86,12 +82,6 @@ export function ActiveSessions() {
     }
   };
 
-  // Actualizar refs cuando cambian los estados
-  useEffect(() => {
-    activeSessionsRef.current = activeSessions;
-    tablesRef.current = tables;
-  }, [activeSessions, tables]);
-
   // Cargar datos iniciales y cada 30 segundos
   useEffect(() => {
     fetchData();
@@ -99,20 +89,19 @@ export function ActiveSessions() {
     return () => clearInterval(interval);
   }, []);
 
-  // Timer que corre cada segundo
+  // Timer que actualiza cada segundo - DEPENDE de activeSessions y tables
   useEffect(() => {
+    if (activeSessions.length === 0) return;
+    
     const timer = setInterval(() => {
-      const currentSessions = activeSessionsRef.current;
-      const currentTables = tablesRef.current;
-      
       const newTimes: { [key: number]: string } = {};
       const newCosts: { [key: number]: number } = {};
       
-      currentSessions.forEach((session) => {
+      activeSessions.forEach((session) => {
         if (session.status === 1) {
           newTimes[session.id] = calculateElapsedTime(session.start_time);
           
-          const table = currentTables.find(t => t.id === session.table_id);
+          const table = tables.find(t => t.id === session.table_id);
           const pricePerHour = table?.category?.base_price || 0;
           newCosts[session.id] = calculateCost(session.start_time, pricePerHour);
         }
@@ -123,7 +112,7 @@ export function ActiveSessions() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []); // Sin dependencias - las funciones están disponibles
+  }, [activeSessions, tables]); // Recrear timer cuando cambien los datos
 
   const getTableSession = (tableId: number): Session | undefined => {
     return activeSessions.find((s) => s.table_id === tableId && s.status === 1);
