@@ -7,7 +7,7 @@ function _hasActive() {
 }
 
 async function findById(id) {
-  const extra = _hasActive() ? " AND is_active = 1" : "";
+  const extra = _hasActive() ? " AND status = 1" : "";
   const rows = await db.query(
     `SELECT id, role_id, first_name, last_name, email, password_hash, phone, created_at, password_changed, reset_code, reset_code_expiry FROM users WHERE id = ?${extra}`,
     [id]
@@ -16,7 +16,7 @@ async function findById(id) {
 }
 
 async function findByEmail(email) {
-  const extra = _hasActive() ? " AND is_active = 1" : "";
+  const extra = _hasActive() ? " AND status = 1" : "";
   const rows = await db.query(
     `SELECT id, role_id, first_name, last_name, email, password_changed FROM users WHERE email = ?${extra}`,
     [email]
@@ -46,7 +46,7 @@ async function create(user) {
 
 
 async function findAll() {
-  const extra = _hasActive() ? " WHERE is_active = 1" : "";
+  const extra = _hasActive() ? " WHERE status = 1" : "";
   const rows = await db.query(
     `SELECT id, role_id, first_name, last_name, email, phone, created_at, password_changed FROM users${extra}`
   );

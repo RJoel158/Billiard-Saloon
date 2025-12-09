@@ -23,7 +23,8 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   padding: 40px;
   width: 100%;
-  max-width: 400px;
+  max-width: 420px;
+  min-height: auto;
   animation: slideIn 0.3s ease-out;
 }
 
@@ -123,13 +124,16 @@
   margin-bottom: 15px;
   font-size: 14px;
   border-left: 4px solid #3c3;
+  font-weight: 500;
+  word-break: break-all;
 }
 
 .auth-switch {
   text-align: center;
   color: #666;
   font-size: 14px;
-  margin: 0;
+  margin: 15px 0;
+  padding: 0;
 }
 
 .switch-button {
@@ -139,12 +143,22 @@
   font-weight: 600;
   cursor: pointer;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.2s, text-decoration 0.2s;
+  font-size: 14px;
 }
 
 .switch-button:hover {
   color: #764ba2;
   text-decoration: underline;
+}
+
+.auth-links {
+  margin-top: 30px;
+  padding-top: 25px;
+  border-top: 2px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 /* Responsive */

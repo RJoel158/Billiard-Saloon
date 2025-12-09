@@ -9,7 +9,9 @@ interface LoginProps {
   onLoginSuccess?: (
     email: string,
     password: string,
-    requiresPasswordChange: boolean
+    requiresPasswordChange: boolean,
+    token?: string,
+    user?: any
   ) => void;
 }
 
@@ -44,18 +46,19 @@ export function Login({
         return;
       }
 
-      if (data.data.token) {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
-      }
-
       console.log("Login exitoso:", data);
-      console.log("requiresPasswordChange:", data.data.requiresPasswordChange);
-      console.log("password_changed:", data.data.user.password_changed);
+      console.log("requiresPasswordChange:", data.requiresPasswordChange);
+      console.log("password_changed:", data.user.password_changed);
+
+      // Solo guardar el token si NO requiere cambio de contraseña
+      if (!data.requiresPasswordChange && data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+      }
 
       // Llamar callback si existe
       if (onLoginSuccess) {
-        onLoginSuccess(email, password, data.data.requiresPasswordChange);
+        onLoginSuccess(email, password, data.requiresPasswordChange, data.token, data.user);
       }
     } catch (err) {
       setError("Error de conexión con el servidor");
@@ -101,27 +104,29 @@ export function Login({
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" disabled={loading} className="auth-button">
-            {loading ? "Cargando..." : "Entrar"}
+            {loading ? "Cargando..." : "Iniciar Sesión"}
           </button>
         </form>
 
-        <p className="auth-switch">
-          ¿No tienes cuenta?{" "}
-          <button type="button" onClick={onSwitch} className="switch-button">
-            Regístrate aquí
-          </button>
-        </p>
+        <div className="auth-links">
+          <p className="auth-switch">
+            ¿Olvidaste tu contraseña?{" "}
+            <button
+              type="button"
+              onClick={onForgotPassword}
+              className="switch-button"
+            >
+              Recupérala aquí
+            </button>
+          </p>
 
-        <p className="auth-switch">
-          ¿Olvidaste tu contraseña?{" "}
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="switch-button"
-          >
-            Recupérala aquí
-          </button>
-        </p>
+          <p className="auth-switch">
+            ¿No tienes cuenta?{" "}
+            <button type="button" onClick={onSwitch} className="switch-button">
+              Regístrate aquí
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   );

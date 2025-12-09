@@ -30,34 +30,7 @@ async function getAllUsersPaged(limit, offset) {
 }
 
 async function updateUser(id, user) {
-  const map = {
-    role_id: 'role_id = ?',
-    first_name: 'first_name = ?',
-    last_name: 'last_name = ?',
-    email: 'email = ?',
-    password_hash: 'password_hash = ?',
-    phone: 'phone = ?',
-    password_changed: 'password_changed = ?',
-    reset_code: 'reset_code = ?',
-    reset_code_expiry: 'reset_code_expiry = ?'
-  };
-
-  const fields = [];
-  const values = [];
-
-  for (const key in map) {
-    if (user[key] !== undefined) {
-      fields.push(map[key]);
-      values.push(user[key]);
-    }
-  }
-
-  if (fields.length === 0) return await findById(id);
-
-  values.push(id);
-  await db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
-
-  return await findById(id);
+  return await userRepo.update(id, user);
 }
 
 

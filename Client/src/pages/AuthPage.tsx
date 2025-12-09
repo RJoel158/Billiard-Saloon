@@ -9,10 +9,14 @@ export function AuthPage() {
   const [requiresPasswordChange, setRequiresPasswordChange] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [userPassword, setUserPassword] = useState<string | null>(null);
+  const [userToken, setUserToken] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
-  const handleLoginSuccess = (email: string, password: string, needsPasswordChange: boolean) => {
+  const handleLoginSuccess = (email: string, password: string, needsPasswordChange: boolean, token?: string, user?: any) => {
     setUserEmail(email);
     setUserPassword(password);
+    if (token) setUserToken(token);
+    if (user) setUserData(user);
     if (needsPasswordChange) {
       setAuthView('changePassword');
       setRequiresPasswordChange(true);
@@ -20,9 +24,16 @@ export function AuthPage() {
   };
 
   const handlePasswordChangeSuccess = () => {
+    // Guardar token después de cambiar contraseña
+    if (userToken) {
+      localStorage.setItem("token", userToken);
+      localStorage.setItem("user", JSON.stringify(userData));
+    }
     setRequiresPasswordChange(false);
     setUserEmail(null);
     setUserPassword(null);
+    setUserToken(null);
+    setUserData(null);
     setAuthView('login');
     console.log('Contraseña cambiada exitosamente. Redirigiendo...');
   };

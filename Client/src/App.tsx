@@ -1,5 +1,5 @@
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { LoginPage } from "./pages/LoginPage";
+import { AuthPage } from "./pages/AuthPage";
 import { MainLayout } from "./pages/MainLayout";
 import "./App.css";
 
@@ -15,7 +15,7 @@ function AppContent() {
     );
   }
 
-  return isAuthenticated ? <MainLayout /> : <LoginPage />;
+  return isAuthenticated ? <MainLayout /> : <AuthPage />;
 }
 
 function App() {

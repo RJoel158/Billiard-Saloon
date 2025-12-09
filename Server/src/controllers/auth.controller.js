@@ -62,7 +62,10 @@ class AuthController {
       res.status(201).json({
         success: true,
         message: 'Usuario registrado exitosamente. Revisa tu email para la contraseña temporal.',
-        data: userWithoutPassword
+        data: {
+          ...userWithoutPassword,
+          temporaryPassword: temporaryPassword  // Para desarrollo - mostrar contraseña temporal
+        }
       });
 
     } catch (err) {
@@ -74,6 +77,11 @@ class AuthController {
   async changeTemporaryPassword(req, res, next) {
     try {
       const { email, temporaryPassword, newPassword, confirmPassword } = req.body;
+
+      console.log('=== CHANGE PASSWORD DEBUG ===');
+      console.log('Email:', email);
+      console.log('Temporary Password recibida:', temporaryPassword);
+      console.log('New Password:', newPassword);
 
       if (!email || !temporaryPassword || !newPassword || !confirmPassword) {
         throw new ApiError(400, 'MISSING_FIELDS', 'Todos los campos son requeridos');
@@ -88,26 +96,47 @@ class AuthController {
       }
 
       const user = await userService.getUserByEmail(email);
-      if (!user) {
-        throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos');
+      console.log('Usuario encontrado:', user ? 'Sí' : 'No');
+      let userRecord = user;
+      if (!userRecord) {
+        // Si no lo encuentra con status = 1, buscar sin filtro de status para permitir cambio de contraseña
+        const sql = 'SELECT id, role_id, first_name, last_name, email, password_changed FROM users WHERE email = ?';
+        const rows = await query(sql, [email]);
+        if (rows.length === 0) {
+          throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos');
+        }
+        userRecord = rows[0];
+        console.log('Usuario encontrado sin filtro de status:', userRecord ? 'Sí' : 'No');
       }
 
-      const userWithPassword = await userService.getUser(user.id);
-      if (!userWithPassword) {
+      // Obtener password_hash directamente sin filtro de status
+      const sqlPassword = 'SELECT id, password_hash FROM users WHERE id = ?';
+      const rowsPassword = await query(sqlPassword, [userRecord.id]);
+      if (rowsPassword.length === 0) {
         throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos');
       }
+      const userPasswordData = rowsPassword[0];
 
-      const isTemporaryPasswordValid = await bcrypt.compare(temporaryPassword, userWithPassword.password_hash);
+      console.log('Comparando contraseñas...');
+      console.log('Contraseña temporal recibida:', temporaryPassword);
+      console.log('Hash en BD:', userPasswordData.password_hash);
+      const isTemporaryPasswordValid = await bcrypt.compare(temporaryPassword, userPasswordData.password_hash);
+      console.log('Contraseña válida:', isTemporaryPasswordValid);
+      
       if (!isTemporaryPasswordValid) {
+        console.log('ERROR: La contraseña temporal NO coincide');
         throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email o contraseña incorrectos');
       }
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-      const updatedUser = await userService.updateUser(user.id, {
-        password_hash: hashedPassword,
-        password_changed: 1
-      });
+      // Actualizar contraseña directamente sin filtro de status
+      await query('UPDATE users SET password_hash = ?, password_changed = 1 WHERE id = ?', [hashedPassword, userRecord.id]);
+
+      // Obtener usuario actualizado sin filtro de status
+      const sqlGetUpdated = 'SELECT id, role_id, first_name, last_name, email, phone, created_at, password_changed FROM users WHERE id = ?';
+      const updatedRows = await query(sqlGetUpdated, [userRecord.id]);
+      const updatedUser = updatedRows[0];
 
       const { password_hash, ...userWithoutPassword } = updatedUser;
 

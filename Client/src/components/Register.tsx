@@ -12,38 +12,63 @@ export function Register({ onSwitch }: RegisterProps) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [temporaryPassword, setTemporaryPassword] = useState('');
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
+    setSuccess('');
+    setTemporaryPassword('');
 
-    if (!firstName || !lastName || !email || !password) {
+    if (!firstName || !lastName || !email) {
       setError('Todos los campos son requeridos');
       return;
     }
 
-    if (password.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('El email no es válido');
       return;
     }
 
     setLoading(true);
 
     try {
-      await register({ 
-        first_name: firstName, 
-        last_name: lastName, 
-        email,
-        password,
-        phone: phone || undefined
+      const response = await fetch('http://localhost:3000/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+        }),
       });
-      // El AuthContext se encargará de actualizar el estado y redirigir
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Error al registrarse');
+        return;
+      }
+
+      const tempPass = data.data.temporaryPassword;
+      setTemporaryPassword(tempPass);
+      setSuccess(`¡Registro exitoso! Tu contraseña temporal es: ${tempPass}`);
+      setFirstName('');
+      setLastName('');
+      setEmail('');
+      
+      // Redirigir al login después de 4 segundos
+      setTimeout(() => {
+        onSwitch();
+      }, 4000);
     } catch (err: any) {
-      setError(err.message || 'Error al registrarse');
+      setError('Error de conexión con el servidor');
       console.error(err);
     } finally {
       setLoading(false);
@@ -91,30 +116,8 @@ export function Register({ onSwitch }: RegisterProps) {
             />
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Contraseña</label>
-            <input
-              id="password"
-              type="password"
-              placeholder="Mínimo 6 caracteres"
-              value={password}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="phone">Teléfono (opcional)</label>
-            <input
-              id="phone"
-              type="tel"
-              placeholder="+591 12345678"
-              value={phone}
-              onChange={(e: ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
-            />
-          </div>
-
           {error && <div className="error-message">{error}</div>}
+          {success && <div className="success-message">{success}</div>}
 
           <button type="submit" disabled={loading} className="auth-button">
             {loading ? 'Registrando...' : 'Registrarse'}

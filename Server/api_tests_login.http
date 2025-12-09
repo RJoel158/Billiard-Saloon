@@ -11,9 +11,9 @@ POST {{api}}/auth/register
 Content-Type: application/json
 
 {
-  "first_name": "Juan",
-  "last_name": "Pérez",
-  "email": "juan.perez@example.com"
+  "first_name": "chapaco",
+  "last_name": "Pantoja",
+  "email": "edu.pantoja1210@gmail.com"
 }
 
 ### 2. Login con credenciales
@@ -21,8 +21,8 @@ POST {{api}}/auth/login
 Content-Type: application/json
 
 {
-  "email": "juan.perez@example.com",
-  "password": "Password123!"
+  "email": "edu.pantoja1210@gmail.com",
+  "password": "f9MvtpSuaaqJ"
 }
 
 ### 3. Renovar token con Refresh Token
@@ -39,14 +39,15 @@ POST {{api}}/auth/logout
 Content-Type: application/json
 
 ### 5. Cambiar contraseña temporal
-### (Requiere token de autenticación)
+### (NO requiere token - requiere email + temporary password)
 POST {{api}}/auth/change-temporary-password
-Authorization: Bearer tu_token
 Content-Type: application/json
 
 {
-  "newPassword": "NuevaPassword123!",
-  "confirmPassword": "NuevaPassword123!"
+  "email": "edu.pantoja1210@gmail.com",
+  "temporaryPassword": "f9MvtpSuaaqJ",
+  "newPassword": "123456789Lm.",
+  "confirmPassword": "123456789Lm."
 }
 
 ### 6. Solicitar restablecimiento de contraseña
