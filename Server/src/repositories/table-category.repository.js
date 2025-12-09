@@ -41,12 +41,12 @@ async function findAllPaged(limit, offset) {
 }
 
 async function countActive() {
-  const rows = await db.query('SELECT COUNT(*) as cnt FROM table_categories');
+  const rows = await db.query("SELECT COUNT(*) as cnt FROM table_categories");
   return rows[0].cnt || 0;
 }
 
 async function countTotal() {
-  const rows = await db.query('SELECT COUNT(*) as total FROM table_categories');
+  const rows = await db.query("SELECT COUNT(*) as total FROM table_categories");
   return rows[0]?.total || 0;
 }
 
@@ -70,11 +70,21 @@ async function update(id, category) {
 }
 
 async function deleteById(id) {
-  const result = await db.query(
-    "DELETE FROM table_categories WHERE id = ?",
-    [id]
-  );
+  const result = await db.query("DELETE FROM table_categories WHERE id = ?", [
+    id,
+  ]);
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, findByName, findByNameLike, findAllPaged, countActive, countTotal, create, update, deleteById };
+module.exports = {
+  findAll,
+  findById,
+  findByName,
+  findByNameLike,
+  findAllPaged,
+  countActive,
+  countTotal,
+  create,
+  update,
+  deleteById,
+};

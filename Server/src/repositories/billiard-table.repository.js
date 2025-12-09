@@ -53,7 +53,6 @@ async function update(id, table) {
 }
 
 async function deleteById(id) {
-  // Logical delete: update status to 0
   const result = await db.query(
     "UPDATE billiard_tables SET status = 0 WHERE id = ?",
     [id]
