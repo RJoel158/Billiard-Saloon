@@ -1,38 +1,29 @@
-import { useState } from "react";
-import type { FormEvent, ChangeEvent } from "react";
-import { useAuth } from "../context/AuthContext";
-import "../styles/Auth.css";
+import { useState } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
+import '../styles/Auth.css';
 
 interface LoginProps {
   onSwitch: () => void;
   onForgotPassword?: () => void;
-  onLoginSuccess?: (
-    email: string,
-    password: string,
-    requiresPasswordChange: boolean
-  ) => void;
+  onLoginSuccess?: (email: string, password: string, requiresPasswordChange: boolean) => void;
 }
 
-export function Login({
-  onSwitch,
-  onForgotPassword,
-  onLoginSuccess,
-}: LoginProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export function Login({ onSwitch, onForgotPassword, onLoginSuccess }: LoginProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
+      const response = await fetch('http://localhost:3000/api/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
@@ -40,25 +31,25 @@ export function Login({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || "Error al iniciar sesión");
+        setError(data.message || 'Error al iniciar sesión');
         return;
       }
 
       if (data.data.token) {
-        localStorage.setItem("token", data.data.token);
-        localStorage.setItem("user", JSON.stringify(data.data.user));
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
       }
 
-      console.log("Login exitoso:", data);
-      console.log("requiresPasswordChange:", data.data.requiresPasswordChange);
-      console.log("password_changed:", data.data.user.password_changed);
+      console.log('Login exitoso:', data);
+      console.log('requiresPasswordChange:', data.data.requiresPasswordChange);
+      console.log('password_changed:', data.data.user.password_changed);
 
       // Llamar callback si existe
       if (onLoginSuccess) {
         onLoginSuccess(email, password, data.data.requiresPasswordChange);
       }
     } catch (err) {
-      setError("Error de conexión con el servidor");
+      setError('Error de conexión con el servidor');
       console.error(err);
     } finally {
       setLoading(false);
@@ -77,9 +68,7 @@ export function Login({
               type="email"
               placeholder="tu@email.com"
               value={email}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setEmail(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               required
             />
           </div>
@@ -91,9 +80,7 @@ export function Login({
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setPassword(e.target.value)
-              }
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               required
             />
           </div>
@@ -101,24 +88,20 @@ export function Login({
           {error && <div className="error-message">{error}</div>}
 
           <button type="submit" disabled={loading} className="auth-button">
-            {loading ? "Cargando..." : "Entrar"}
+            {loading ? 'Cargando...' : 'Entrar'}
           </button>
         </form>
 
         <p className="auth-switch">
-          ¿No tienes cuenta?{" "}
+          ¿No tienes cuenta?{' '}
           <button type="button" onClick={onSwitch} className="switch-button">
             Regístrate aquí
           </button>
         </p>
 
         <p className="auth-switch">
-          ¿Olvidaste tu contraseña?{" "}
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="switch-button"
-          >
+          ¿Olvidaste tu contraseña?{' '}
+          <button type="button" onClick={onForgotPassword} className="switch-button">
             Recupérala aquí
           </button>
         </p>
