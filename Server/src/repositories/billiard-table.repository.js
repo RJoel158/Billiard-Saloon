@@ -22,7 +22,6 @@ async function update(id, table) {
 }
 
 async function deleteById(id) {
-  // Physical delete: table has no is_active in schema, remove row
   const result = await db.query('DELETE FROM billiard_tables WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }

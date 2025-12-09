@@ -9,7 +9,7 @@ async function getUser(id) {
 
 async function getUserByEmail(email) {
   const user = await userRepo.findByEmail(email);
-  return user; // Retorna null si no existe
+  return user;
 }
 
 async function createUser(data) {

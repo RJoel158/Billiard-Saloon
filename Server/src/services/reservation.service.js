@@ -11,7 +11,6 @@ async function getReservationById(id) {
 }
 
 async function createReservation(data) {
-  // basic validation
   if (!data.user_id || !data.table_id || !data.reservation_date || !data.start_time || !data.end_time) {
     throw new Error('Missing required reservation fields');
   }

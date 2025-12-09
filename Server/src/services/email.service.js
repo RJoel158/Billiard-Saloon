@@ -1,6 +1,5 @@
 const nodemailer = require('nodemailer');
 
-// Configurar el transporte de Gmail
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -9,12 +8,6 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-/**
- * Enviar email de bienvenida con contraseña temporal
- * @param {string} email - Email del usuario
- * @param {string} firstName - Nombre del usuario
- * @param {string} temporaryPassword - Contraseña temporal generada
- */
 async function sendWelcomeEmail(email, firstName, temporaryPassword) {
   try {
     const mailOptions = {
@@ -76,11 +69,6 @@ async function sendWelcomeEmail(email, firstName, temporaryPassword) {
   }
 }
 
-/**
- * Enviar email de restablecimiento de contraseña con código
- * @param {string} email - Email del usuario
- * @param {string} resetCode - Código de 6 dígitos para restablecer contraseña
- */
 async function sendPasswordResetEmail(email, resetCode) {
   try {
     const mailOptions = {

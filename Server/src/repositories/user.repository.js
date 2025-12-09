@@ -1,6 +1,7 @@
 const db = require('../db/db');
 const schema = require('../db/schema');
 
+
 function _hasActive() {
   return schema.hasColumn('users', 'is_active');
 }
@@ -17,6 +18,7 @@ async function findByEmail(email) {
   return rows[0] || null;
 }
 
+
 async function create(user) {
   await db.query(
     'INSERT INTO users (role_id, first_name, last_name, email, password_hash, phone, password_changed) VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -26,6 +28,7 @@ async function create(user) {
   return rows[0] || null;
 }
 
+
 async function findAll() {
   const extra = _hasActive() ? ' WHERE is_active = 1' : '';
   const rows = await db.query(`SELECT id, role_id, first_name, last_name, email, phone, created_at, password_changed FROM users${extra}`);
@@ -33,25 +36,36 @@ async function findAll() {
 }
 
 async function update(id, user) {
+  const map = {
+    role_id: 'role_id = ?',
+    first_name: 'first_name = ?',
+    last_name: 'last_name = ?',
+    email: 'email = ?',
+    password_hash: 'password_hash = ?',
+    phone: 'phone = ?',
+    password_changed: 'password_changed = ?',
+    reset_code: 'reset_code = ?',
+    reset_code_expiry: 'reset_code_expiry = ?'
+  };
+
   const fields = [];
   const values = [];
-  
-  if (user.role_id !== undefined) { fields.push('role_id = ?'); values.push(user.role_id); }
-  if (user.first_name !== undefined) { fields.push('first_name = ?'); values.push(user.first_name); }
-  if (user.last_name !== undefined) { fields.push('last_name = ?'); values.push(user.last_name); }
-  if (user.email !== undefined) { fields.push('email = ?'); values.push(user.email); }
-  if (user.password_hash !== undefined) { fields.push('password_hash = ?'); values.push(user.password_hash); }
-  if (user.phone !== undefined) { fields.push('phone = ?'); values.push(user.phone); }
-  if (user.password_changed !== undefined) { fields.push('password_changed = ?'); values.push(user.password_changed); }
-  if (user.reset_code !== undefined) { fields.push('reset_code = ?'); values.push(user.reset_code); }
-  if (user.reset_code_expiry !== undefined) { fields.push('reset_code_expiry = ?'); values.push(user.reset_code_expiry); }
-  
+
+  for (const key in map) {
+    if (user[key] !== undefined) {
+      fields.push(map[key]);
+      values.push(user[key]);
+    }
+  }
+
   if (fields.length === 0) return await findById(id);
-  
+
   values.push(id);
   await db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+
   return await findById(id);
 }
+
 
 async function deleteById(id) {
   if (_hasActive()) {

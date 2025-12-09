@@ -11,7 +11,6 @@ async function getTableById(id) {
 }
 
 async function createTable(data) {
-  // basic validation
   if (!data.category_id || !data.code) throw new Error('category_id and code are required');
   return await repository.create(data);
 }

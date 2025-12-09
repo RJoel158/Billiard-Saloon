@@ -1,10 +1,6 @@
 const authService = require('../services/auth.service');
 const ApiError = require('./apiError');
 
-/**
- * Middleware para verificar JWT token
- * Extrae el token del header Authorization y lo valida
- */
 async function authMiddleware(req, res, next) {
   try {
     const authHeader = req.headers.authorization;
@@ -13,10 +9,10 @@ async function authMiddleware(req, res, next) {
       throw new ApiError(401, 'MISSING_TOKEN', 'Token no proporcionado. Use: Authorization: Bearer <token>');
     }
 
-    const token = authHeader.substring(7); // Remover "Bearer " del inicio
+    const token = authHeader.substring(7);
 
     const decoded = authService.verifyToken(token);
-    req.user = decoded; // Agregar usuario al request
+    req.user = decoded;
 
     next();
   } catch (err) {
@@ -24,9 +20,6 @@ async function authMiddleware(req, res, next) {
   }
 }
 
-/**
- * Middleware para verificar que el usuario sea admin
- */
 async function adminMiddleware(req, res, next) {
   try {
     if (!req.user) {

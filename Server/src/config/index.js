@@ -1,4 +1,3 @@
-// Configuración simple tomada de variables de entorno
 module.exports = {
   port: process.env.PORT || 3000,
   db: {

@@ -1,8 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const db = require("./src/db/db");
-require('dotenv').config(); // Cargar variables de entorno
-// routes will be required after schema init in startServer
+require('dotenv').config();
 let tableCategoryRoutes;
 let userRoutes;
 let paymentRoutes;
@@ -12,12 +11,11 @@ let dynamicPricingRoutes;
 let reservationRoutes;
 let sessionRoutes;
 let authRoutes;
-const { errorHandler } = require("./src/middlewares/errorHandler");
+const errorHandler = require("./src/middlewares/errorHandler");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configurar CORS
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true,
@@ -27,12 +25,8 @@ app.use(cors({
 
 app.use(express.json());
 
-// Montar rutas (se harán después de inicializar el esquema en startServer)
-
-// Middleware de errores
 app.use(errorHandler);
 
-// Verificar conexión a la base de datos
 async function checkDatabaseConnection() {
   try {
     await db.query("SELECT 1");
@@ -43,16 +37,13 @@ async function checkDatabaseConnection() {
   }
 }
 
-// Definir una ruta para la raíz
 app.get('/', (req, res) => {
   res.send('¡Bienvenido al servidor! 🚀');
 });
 
-// Iniciar el servidor
 async function startServer() {
   await checkDatabaseConnection();
 
-  // Initialize schema info so repositories can adapt queries
   const schema = require('./src/db/schema');
   try {
     await schema.init();
@@ -60,8 +51,6 @@ async function startServer() {
   } catch (err) {
     console.warn('⚠️ No se pudo leer el esquema de la DB:', err.message);
   }
-
-  // Now require and mount routes
   tableCategoryRoutes = require("./src/routes/table-category.routes");
   userRoutes = require("./src/routes/user.routes");
   paymentRoutes = require("./src/routes/payment.routes");

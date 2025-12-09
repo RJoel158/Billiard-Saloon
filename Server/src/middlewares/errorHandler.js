@@ -1,9 +1,4 @@
-function ApiError(statusCode, code, message) {
-  this.statusCode = statusCode;
-  this.code = code;
-  this.message = message;
-  this.isApiError = true;
-}
+const ApiError = require('./apiError');
 
 function errorHandler(err, req, res, next) {
   if (err && err.isApiError) {
@@ -27,4 +22,4 @@ function errorHandler(err, req, res, next) {
   });
 }
 
-module.exports = { errorHandler, ApiError };
+module.exports = errorHandler;

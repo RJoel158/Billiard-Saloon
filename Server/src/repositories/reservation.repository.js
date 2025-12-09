@@ -22,7 +22,6 @@ async function update(id, r) {
 }
 
 async function deleteById(id) {
-  // Logical delete: mark as cancelled (3)
   const result = await db.query('UPDATE reservations SET status = 3 WHERE id = ?', [id]);
   return result.affectedRows > 0;
 }
