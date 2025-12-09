@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent, ChangeEvent } from 'react';
+import { useAuth } from '../context/AuthContext';
 import '../styles/Auth.css';
 
 interface RegisterProps {
@@ -7,55 +8,42 @@ interface RegisterProps {
 }
 
 export function Register({ onSwitch }: RegisterProps) {
+  const { register } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
-    if (!firstName || !lastName || !email) {
+    if (!firstName || !lastName || !email || !password) {
       setError('Todos los campos son requeridos');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('La contraseña debe tener al menos 6 caracteres');
       return;
     }
 
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          first_name: firstName, 
-          last_name: lastName, 
-          email 
-        }),
+      await register({ 
+        first_name: firstName, 
+        last_name: lastName, 
+        email,
+        password,
+        phone: phone || undefined
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Error al registrarse');
-        return;
-      }
-
-      setSuccess('¡Registro exitoso! Revisa tu email para la contraseña temporal');
-      setFirstName('');
-      setLastName('');
-      setEmail('');
-
-      setTimeout(() => {
-        onSwitch();
-      }, 3000);
-    } catch (err) {
-      setError('Error de conexión con el servidor');
+      // El AuthContext se encargará de actualizar el estado y redirigir
+    } catch (err: any) {
+      setError(err.message || 'Error al registrarse');
       console.error(err);
     } finally {
       setLoading(false);
@@ -103,8 +91,30 @@ export function Register({ onSwitch }: RegisterProps) {
             />
           </div>
 
+          <div className="form-group">
+            <label htmlFor="password">Contraseña</label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Mínimo 6 caracteres"
+              value={password}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="phone">Teléfono (opcional)</label>
+            <input
+              id="phone"
+              type="tel"
+              placeholder="+591 12345678"
+              value={phone}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPhone(e.target.value)}
+            />
+          </div>
+
           {error && <div className="error-message">{error}</div>}
-          {success && <div className="success-message">{success}</div>}
 
           <button type="submit" disabled={loading} className="auth-button">
             {loading ? 'Registrando...' : 'Registrarse'}

@@ -29,41 +29,37 @@ async function getAllUsersPaged(limit, offset) {
   return { users, total };
 }
 
-async function updateUser(id, data) {
-  const existing = await userRepo.findById(id);
-  if (!existing)
-    throw new ApiError(404, "USER_NOT_FOUND", "Usuario no encontrado");
-
-  // Merge with existing data to avoid undefined values in query params
-  const payload = {
-    role_id: data.role_id !== undefined ? data.role_id : existing.role_id,
-    first_name:
-      data.first_name !== undefined ? data.first_name : existing.first_name,
-    last_name:
-      data.last_name !== undefined ? data.last_name : existing.last_name,
-    email: data.email !== undefined ? data.email : existing.email,
-    password_hash:
-      data.password_hash !== undefined
-        ? data.password_hash
-        : existing.password_hash,
-    phone: data.phone !== undefined ? data.phone : existing.phone,
-    password_changed:
-      data.password_changed !== undefined
-        ? data.password_changed
-        : existing.password_changed,
-    reset_code:
-      data.reset_code !== undefined
-        ? data.reset_code
-        : existing.reset_code,
-    reset_code_expiry:
-      data.reset_code_expiry !== undefined
-        ? data.reset_code_expiry
-        : existing.reset_code_expiry,
+async function updateUser(id, user) {
+  const map = {
+    role_id: 'role_id = ?',
+    first_name: 'first_name = ?',
+    last_name: 'last_name = ?',
+    email: 'email = ?',
+    password_hash: 'password_hash = ?',
+    phone: 'phone = ?',
+    password_changed: 'password_changed = ?',
+    reset_code: 'reset_code = ?',
+    reset_code_expiry: 'reset_code_expiry = ?'
   };
 
-  const updated = await userRepo.update(id, payload);
-  return updated;
+  const fields = [];
+  const values = [];
+
+  for (const key in map) {
+    if (user[key] !== undefined) {
+      fields.push(map[key]);
+      values.push(user[key]);
+    }
+  }
+
+  if (fields.length === 0) return await findById(id);
+
+  values.push(id);
+  await db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = ?`, values);
+
+  return await findById(id);
 }
+
 
 async function deleteUser(id) {
   const existing = await userRepo.findById(id);

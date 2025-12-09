@@ -329,7 +329,51 @@ class AuthController {
     }
   }
 
-  // Obtener datos del usuario autenticado
+  async refreshTokenEndpoint(req, res, next) {
+    try {
+      const { refreshToken } = req.body;
+
+      if (!refreshToken) {
+        throw new ApiError(400, 'MISSING_REFRESH_TOKEN', 'Refresh token es requerido');
+      }
+
+      const decoded = jwt.verify(refreshToken, JWT_SECRET);
+      
+      const user = await userService.getUser(decoded.id);
+      if (!user) {
+        throw new ApiError(401, 'USER_NOT_FOUND', 'Usuario no encontrado');
+      }
+
+      const newToken = jwt.sign(
+        { 
+          id: user.id, 
+          email: user.email,
+          role_id: user.role_id
+        },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
+
+      const newRefreshToken = jwt.sign(
+        { id: user.id },
+        JWT_SECRET,
+        { expiresIn: '7d' }
+      );
+
+      res.json({
+        success: true,
+        message: 'Token renovado',
+        data: {
+          token: newToken,
+          refreshToken: newRefreshToken
+        }
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  }
+
   async me(req, res, next) {
     try {
       const userId = req.user.id;
@@ -359,7 +403,6 @@ class AuthController {
     }
   }
 
-  // Logout
   async logout(req, res, next) {
     try {
       res.json({
