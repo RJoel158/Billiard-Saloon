@@ -1,0 +1,54 @@
+const reservationService = require("../services/reservation.service");
+const settingsRepo = require("../repositories/system-settings.repository");
+
+/**
+ * Get available time slots for a table on a specific date
+ * Uses system settings for opening/closing hours
+ * GET /api/availability/:tableId?date=YYYY-MM-DD
+ */
+async function getAvailableSlots(req, res, next) {
+  try {
+    const { tableId } = req.params;
+    const { date } = req.query;
+
+    // Validate date format
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res.status(400).json({
+        error: "INVALID_DATE",
+        message: "Fecha inválida. Formato requerido: YYYY-MM-DD",
+      });
+    }
+
+    // Get system settings for business hours
+    const settings = await settingsRepo.findCurrent();
+    const openingHour = settings?.opening_time
+      ? parseInt(settings.opening_time.split(":")[0])
+      : 8;
+    const closingHour = settings?.closing_time
+      ? parseInt(settings.closing_time.split(":")[0])
+      : 23;
+
+    // Get available slots from service
+    const availableSlots = await reservationService.getAvailableSlotsWithSettings(
+      parseInt(tableId),
+      date,
+      openingHour,
+      closingHour
+    );
+
+    res.json({
+      table_id: parseInt(tableId),
+      date,
+      opening_time: `${openingHour}:00`,
+      closing_time: `${closingHour}:00`,
+      available_slots: availableSlots,
+      total_slots: availableSlots.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+module.exports = {
+  getAvailableSlots,
+};

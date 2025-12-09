@@ -2,14 +2,14 @@ const db = require("../db/db");
 
 async function findAll() {
   const rows = await db.query(
-    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations"
+    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status, created_at FROM reservations"
   );
   return rows;
 }
 
 async function findAllPaged(limit, offset) {
   const rows = await db.query(
-    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations ORDER BY created_at DESC LIMIT ? OFFSET ?",
+    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status, created_at FROM reservations ORDER BY created_at DESC LIMIT ? OFFSET ?",
     [limit, offset]
   );
   return rows;
@@ -17,7 +17,7 @@ async function findAllPaged(limit, offset) {
 
 async function findById(id) {
   const rows = await db.query(
-    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations WHERE id = ?",
+    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status, created_at FROM reservations WHERE id = ?",
     [id]
   );
   return rows[0] || null;
@@ -25,7 +25,7 @@ async function findById(id) {
 
 async function findByTableAndDateRange(table_id, start_time, end_time) {
   const rows = await db.query(
-    `SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at 
+    `SELECT id, user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status, created_at 
      FROM reservations 
      WHERE table_id = ? 
        AND status IN (1, 2) 
@@ -52,31 +52,35 @@ async function findAvailableSlots(table_id, date) {
 
 async function create(r) {
   await db.query(
-    "INSERT INTO reservations (user_id, table_id, reservation_date, start_time, end_time, status) VALUES (?, ?, ?, ?, ?, ?)",
+    "INSERT INTO reservations (user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
     [
       r.user_id,
       r.table_id,
       r.reservation_date,
       r.start_time,
       r.end_time,
+      r.qr_payment_path || null,
+      r.payment_verified || false,
       r.status || 1,
     ]
   );
   const rows = await db.query(
-    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, status, created_at FROM reservations WHERE id = LAST_INSERT_ID()"
+    "SELECT id, user_id, table_id, reservation_date, start_time, end_time, qr_payment_path, payment_verified, status, created_at FROM reservations WHERE id = LAST_INSERT_ID()"
   );
   return rows[0] || null;
 }
 
 async function update(id, r) {
   await db.query(
-    "UPDATE reservations SET user_id = ?, table_id = ?, reservation_date = ?, start_time = ?, end_time = ?, status = ? WHERE id = ?",
+    "UPDATE reservations SET user_id = ?, table_id = ?, reservation_date = ?, start_time = ?, end_time = ?, qr_payment_path = ?, payment_verified = ?, status = ? WHERE id = ?",
     [
       r.user_id,
       r.table_id,
       r.reservation_date,
       r.start_time,
       r.end_time,
+      r.qr_payment_path || null,
+      r.payment_verified !== undefined ? r.payment_verified : false,
       r.status,
       id,
     ]

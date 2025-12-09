@@ -74,6 +74,7 @@ async function startServer() {
   reservationRoutes = require("./src/routes/reservation.routes");
   sessionRoutes = require("./src/routes/session.routes");
   systemSettingsRoutes = require("./src/routes/system-settings.routes");
+  const availabilityRoutes = require("./src/routes/availability.routes");
 
   app.use("/api/auth", authRoutes);
   app.use("/api/table-categories", tableCategoryRoutes);
@@ -85,6 +86,7 @@ async function startServer() {
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/sessions', sessionRoutes);
   app.use('/api/settings', systemSettingsRoutes);
+  app.use('/api/availability', availabilityRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);

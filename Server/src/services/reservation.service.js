@@ -64,6 +64,49 @@ async function getAvailableSlots(table_id, date) {
   return availableSlots;
 }
 
+async function getAvailableSlotsWithSettings(table_id, date, openingHour, closingHour) {
+  // Validate table exists
+  const table = await tableRepo.findById(table_id);
+  if (!table) throw new ApiError(404, "TABLE_NOT_FOUND", "Mesa no encontrada");
+
+  // Get busy slots (reservations + active sessions)
+  const busySlots = await repository.findAvailableSlots(table_id, date);
+
+  // Generate available hourly slots
+  const now = new Date();
+  const targetDate = new Date(date);
+  const isToday = targetDate.toDateString() === now.toDateString();
+
+  // If today, start from next hour or opening hour (whichever is later)
+  const startHour = isToday ? Math.max(now.getHours() + 1, openingHour) : openingHour;
+
+  const availableSlots = [];
+
+  for (let hour = startHour; hour < closingHour; hour++) {
+    const slotStart = new Date(targetDate);
+    slotStart.setHours(hour, 0, 0, 0);
+    const slotEnd = new Date(slotStart);
+    slotEnd.setHours(hour + 1, 0, 0, 0);
+
+    // Check if this slot conflicts with any busy slot
+    const hasConflict = busySlots.some((busy) => {
+      const busyStart = new Date(busy.start_time);
+      const busyEnd = new Date(busy.end_time);
+      return slotStart < busyEnd && slotEnd > busyStart;
+    });
+
+    if (!hasConflict) {
+      availableSlots.push({
+        start_time: slotStart,
+        end_time: slotEnd,
+        hour: `${hour}:00 - ${hour + 1}:00`,
+      });
+    }
+  }
+
+  return availableSlots;
+}
+
 async function createReservation(data) {
   // Validate required fields
   if (!data.user_id || !data.table_id || !data.start_time || !data.end_time) {
@@ -136,6 +179,8 @@ async function createReservation(data) {
     reservation_date: startTime,
     start_time: startTime,
     end_time: endTime,
+    qr_payment_path: data.qr_payment_path || null,
+    payment_verified: data.payment_verified || false,
     status: 1, // pending
   });
 
@@ -153,8 +198,12 @@ async function approveReservation(id, admin_user_id) {
     );
   }
 
-  // Update status to confirmed (2)
-  const updated = await repository.updateStatus(id, 2);
+  // Update status to confirmed (2) and mark payment as verified
+  const updated = await repository.update(id, {
+    ...reservation,
+    status: 2,
+    payment_verified: true,
+  });
 
   // TODO: Send notification via socket.io to user
 
@@ -194,6 +243,8 @@ async function updateReservation(id, data) {
     start_time:
       data.start_time !== undefined ? data.start_time : existing.start_time,
     end_time: data.end_time !== undefined ? data.end_time : existing.end_time,
+    qr_payment_path: data.qr_payment_path !== undefined ? data.qr_payment_path : existing.qr_payment_path,
+    payment_verified: data.payment_verified !== undefined ? data.payment_verified : existing.payment_verified,
     status: data.status !== undefined ? data.status : existing.status,
   };
 
@@ -209,9 +260,11 @@ module.exports = {
   getAllReservations,
   getReservationById,
   getAvailableSlots,
+  getAvailableSlotsWithSettings,
   createReservation,
   approveReservation,
   rejectReservation,
   updateReservation,
   deleteReservation,
+  getAllReservationsPaged,
 };

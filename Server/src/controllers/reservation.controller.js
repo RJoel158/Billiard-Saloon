@@ -1,5 +1,7 @@
 const service = require('../services/reservation.service');
 const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
+const path = require('path');
+const fs = require('fs');
 
 async function getAll(req, res, next) {
   try {
@@ -22,7 +24,14 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    const item = await service.createReservation(req.body);
+    // Add QR payment path if file was uploaded
+    const data = { ...req.body };
+    if (req.file) {
+      data.qr_payment_path = req.file.path;
+      data.payment_verified = false; // Pending admin verification
+    }
+    
+    const item = await service.createReservation(data);
     res.status(201).json(item);
   } catch (err) {
     next(err);
@@ -81,4 +90,33 @@ async function reject(req, res, next) {
   }
 }
 
-module.exports = { getAll, getById, create, update, deleteReservation, getAvailableSlots, approve, reject };
+async function getQRImage(req, res, next) {
+  try {
+    const reservation = await service.getReservationById(req.params.id);
+    
+    if (!reservation.qr_payment_path) {
+      return res.status(404).json({ 
+        error: 'QR_NOT_FOUND', 
+        message: 'Esta reserva no tiene imagen de pago adjunta' 
+      });
+    }
+
+    // Resolve the file path
+    const filePath = path.resolve(reservation.qr_payment_path);
+    
+    // Check if file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ 
+        error: 'FILE_NOT_FOUND', 
+        message: 'El archivo de imagen no existe en el servidor' 
+      });
+    }
+
+    // Send file
+    res.sendFile(filePath);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { getAll, getById, create, update, deleteReservation, getAvailableSlots, approve, reject, getQRImage };
