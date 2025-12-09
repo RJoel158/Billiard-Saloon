@@ -59,7 +59,7 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findById, create, findAll, findAllPaged, countTotal, findBySession, update, deleteById };
+module.exports = { findById, create, findAll, findAllPaged, countTotal, findBySession, findBySessionId: findBySession, update, deleteById };
 
 
 

@@ -20,12 +20,19 @@ async function getAvailableSlots(req, res, next) {
     }
 
     // Get system settings for business hours
-    const settings = await settingsRepo.findCurrent();
-    const openingHour = settings?.opening_time
-      ? parseInt(settings.opening_time.split(":")[0])
+    const settings = await settingsRepo.findByKeys(['opening_time', 'closing_time']);
+    
+    // Convert array to object for easy access
+    const settingsObj = settings.reduce((acc, setting) => {
+      acc[setting.setting_key] = setting.setting_value;
+      return acc;
+    }, {});
+    
+    const openingHour = settingsObj.opening_time
+      ? parseInt(settingsObj.opening_time.split(":")[0])
       : 8;
-    const closingHour = settings?.closing_time
-      ? parseInt(settings.closing_time.split(":")[0])
+    const closingHour = settingsObj.closing_time
+      ? parseInt(settingsObj.closing_time.split(":")[0])
       : 23;
 
     // Get available slots from service

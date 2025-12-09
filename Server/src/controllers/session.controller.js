@@ -3,6 +3,23 @@ const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagin
 
 async function getAll(req, res, next) {
   try {
+    // Si se pasa status=1 (activas), usar el endpoint de sesiones activas
+    if (req.query.status === '1') {
+      const sessions = await service.getActiveSessions();
+      return res.json({ 
+        success: true, 
+        data: sessions,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: sessions.length,
+          itemsPerPage: sessions.length,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      });
+    }
+    
     const { page, limit, offset } = getPaginationParams(req.query);
     const { sessions, total } = await service.getAllSessionsPaged(limit, offset);
     res.json(formatPaginatedResponse(sessions, total, page, limit));

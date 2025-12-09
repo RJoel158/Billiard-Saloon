@@ -19,6 +19,10 @@ async function getAllPaymentsPaged(limit, offset) {
   return { payments, total };
 }
 
+async function getPaymentsBySession(session_id) {
+  return await paymentRepo.findBySessionId(session_id);
+}
+
 async function create(data) {
   // Basic validation
   if (!data.session_id || !data.amount || !data.method) {
@@ -63,4 +67,4 @@ async function deletePayment(id) {
   return await paymentRepo.deleteById(id);
 }
 
-module.exports = { getPayment, create, getAllPayments, getAllPaymentsPaged, deletePayment };
+module.exports = { getPayment, create, getAllPayments, getAllPaymentsPaged, getPaymentsBySession, deletePayment };

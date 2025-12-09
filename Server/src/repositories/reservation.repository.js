@@ -96,6 +96,11 @@ async function updateStatus(id, status) {
   return await findById(id);
 }
 
+async function countTotal() {
+  const rows = await db.query("SELECT COUNT(*) as total FROM reservations");
+  return rows[0].total;
+}
+
 async function deleteById(id) {
   // Logical delete: mark as cancelled (3)
   const result = await db.query(
@@ -107,6 +112,8 @@ async function deleteById(id) {
 
 module.exports = {
   findAll,
+  findAllPaged,
+  countTotal,
   findById,
   findByTableAndDateRange,
   findAvailableSlots,
