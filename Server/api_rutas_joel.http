@@ -1,0 +1,179 @@
+###############################################################################
+# FLUJO COMPLETO DE RESERVAS CON QR - BILLIARD SALOON
+# Descripción: Prueba el ciclo completo desde que un cliente ve disponibilidad
+# hasta que paga y finaliza la sesión
+###############################################################################
+
+# Variables globales
+@baseUrl = http://localhost:3000/api
+@tableId = 3
+@userId = 10
+@adminId = 4
+@date = 2025-12-09
+
+###############################################################################
+# PASO 1: CLIENTE VE DISPONIBILIDAD DE UNA MESA
+###############################################################################
+
+### 1.1 - Obtener disponibilidad de una mesa específica en una fecha
+# El cliente selecciona una mesa y ve los horarios disponibles
+GET {{baseUrl}}/availability/{{tableId}}?date={{date}}
+Content-Type: application/json
+
+###
+### 1.2 - Ver todas las mesas disponibles
+GET {{baseUrl}}/tables
+Content-Type: application/json
+
+###
+### 1.3 - Ver configuración del sistema (horarios, tarifas)
+GET {{baseUrl}}/settings
+Content-Type: application/json
+
+###############################################################################
+# PASO 2: CLIENTE CREA RESERVA CON COMPROBANTE QR
+###############################################################################
+
+### 2.1 - Crear reserva SIN imagen QR (solo datos básicos)
+POST {{baseUrl}}/reservations
+Content-Type: application/json
+
+{
+  "user_id": {{userId}},
+  "table_id": {{tableId}},
+  "start_time": "2025-12-10T14:00:00.000Z",
+  "end_time": "2025-12-10T16:00:00.000Z"
+}
+
+
+# Guardar el ID de la reserva creada
+# @reservationId = <ID_DE_LA_RESPUESTA>
+@reservationId = 5
+
+###############################################################################
+# PASO 3: ADMIN VE RESERVAS PENDIENTES
+###############################################################################
+
+### 3.1 - Ver todas las reservas (paginado)
+GET {{baseUrl}}/reservations?page=1&limit=10
+Content-Type: application/json
+
+###
+### 3.2 - Ver una reserva específica
+GET {{baseUrl}}/reservations/{{reservationId}}
+Content-Type: application/json
+
+###
+### 3.3 - Ver imagen QR del comprobante de pago
+# Abrir en navegador: http://localhost:3000/api/reservations/{{reservationId}}/qr
+GET {{baseUrl}}/reservations/{{reservationId}}/qr
+
+###############################################################################
+# PASO 4A: ADMIN APRUEBA LA RESERVA
+###############################################################################
+
+### 4A.1 - Aprobar reserva (marca payment_verified = true, status = 2)
+PATCH {{baseUrl}}/reservations/{{reservationId}}/approve
+Content-Type: application/json
+
+{
+  "admin_user_id": {{adminId}}
+}
+
+# Después de aprobar, el cliente puede iniciar sesión
+
+###############################################################################
+# PASO 4B: ADMIN RECHAZA LA RESERVA (ALTERNATIVA)
+###############################################################################
+
+### 4B.1 - Rechazar reserva (status = 3, cancelada)
+PATCH {{baseUrl}}/reservations/{{reservationId}}/reject
+Content-Type: application/json
+
+{
+  "admin_user_id": {{adminId}},
+  "reason": "Comprobante de pago inválido o no legible"
+}
+
+###############################################################################
+# PASO 5: INICIAR SESIÓN DE JUEGO (después de aprobación)
+###############################################################################
+
+### 5.1 - Iniciar sesión basada en reserva aprobada
+POST {{baseUrl}}/sessions/start
+Content-Type: application/json
+
+{
+  "table_id": {{tableId}},
+  "user_id": {{userId}},
+  "reservation_id": {{reservationId}}
+}
+
+# Guardar el ID de la sesión creada
+# @sessionId = <ID_DE_LA_RESPUESTA>
+
+###
+@sessionId = 8
+
+###
+### 5.2 - Ver sesiones activas
+GET {{baseUrl}}/sessions?status=1
+Content-Type: application/json
+
+###
+### 5.3 - Ver detalles de una sesión específica
+GET {{baseUrl}}/sessions/{{sessionId}}
+Content-Type: application/json
+
+###############################################################################
+# PASO 6: FINALIZAR SESIÓN Y GENERAR PAGO
+###############################################################################
+
+### 6.1 - Finalizar sesión SIN multa (genera pago automático)
+POST {{baseUrl}}/sessions/{{sessionId}}/finalize
+Content-Type: application/json
+
+{
+  "apply_penalty": false
+}
+
+###
+### 6.2 - Finalizar sesión CON multa (genera pago con penalización)
+POST {{baseUrl}}/sessions/{{sessionId}}/finalize
+Content-Type: application/json
+
+{
+  "apply_penalty": true,
+  "penalty_reason": "Cliente llegó 30 minutos tarde"
+}
+
+###
+### 6.3 - Método alternativo: Terminar sesión simple (Eduardo's method)
+POST {{baseUrl}}/sessions/{{sessionId}}/end
+Content-Type: application/json
+
+{}
+
+###############################################################################
+# PASO 7: VER PAGO GENERADO
+###############################################################################
+
+### 7.1 - Ver todos los pagos
+GET {{baseUrl}}/payments?page=1&limit=10
+Content-Type: application/json
+
+###
+### 7.2 - Ver pago específico de la sesión
+# Buscar el pago con session_id = {{sessionId}}
+GET {{baseUrl}}/payments?session_id={{sessionId}}
+Content-Type: application/json
+
+###
+### 7.3 - Ver detalles de un pago específico
+@paymentId = 6
+GET {{baseUrl}}/payments/{{paymentId}}
+Content-Type: application/json
+
+
+
+

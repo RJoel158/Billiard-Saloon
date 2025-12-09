@@ -21,19 +21,15 @@ async function getReservationById(id) {
 }
 
 async function getAvailableSlots(table_id, date) {
-  // Validate table exists
   const table = await tableRepo.findById(table_id);
   if (!table) throw new ApiError(404, "TABLE_NOT_FOUND", "Mesa no encontrada");
 
-  // Get busy slots (reservations + active sessions)
   const busySlots = await repository.findAvailableSlots(table_id, date);
 
-  // Generate available hourly slots for today (from current hour to closing)
   const now = new Date();
   const targetDate = new Date(date);
   const isToday = targetDate.toDateString() === now.toDateString();
 
-  // Business hours: 8 AM to 11 PM (configurable)
   const openingHour = isToday ? Math.max(now.getHours() + 1, 8) : 8;
   const closingHour = 23;
 
@@ -65,19 +61,15 @@ async function getAvailableSlots(table_id, date) {
 }
 
 async function getAvailableSlotsWithSettings(table_id, date, openingHour, closingHour) {
-  // Validate table exists
   const table = await tableRepo.findById(table_id);
   if (!table) throw new ApiError(404, "TABLE_NOT_FOUND", "Mesa no encontrada");
 
-  // Get busy slots (reservations + active sessions)
   const busySlots = await repository.findAvailableSlots(table_id, date);
 
-  // Generate available hourly slots
   const now = new Date();
   const targetDate = new Date(date);
   const isToday = targetDate.toDateString() === now.toDateString();
 
-  // If today, start from next hour or opening hour (whichever is later)
   const startHour = isToday ? Math.max(now.getHours() + 1, openingHour) : openingHour;
 
   const availableSlots = [];
@@ -88,7 +80,6 @@ async function getAvailableSlotsWithSettings(table_id, date, openingHour, closin
     const slotEnd = new Date(slotStart);
     slotEnd.setHours(hour + 1, 0, 0, 0);
 
-    // Check if this slot conflicts with any busy slot
     const hasConflict = busySlots.some((busy) => {
       const busyStart = new Date(busy.start_time);
       const busyEnd = new Date(busy.end_time);
@@ -108,7 +99,6 @@ async function getAvailableSlotsWithSettings(table_id, date, openingHour, closin
 }
 
 async function createReservation(data) {
-  // Validate required fields
   if (!data.user_id || !data.table_id || !data.start_time || !data.end_time) {
     throw new ApiError(
       400,
@@ -117,17 +107,14 @@ async function createReservation(data) {
     );
   }
 
-  // Validate table exists and is available
   const table = await tableRepo.findById(data.table_id);
   if (!table) throw new ApiError(404, "TABLE_NOT_FOUND", "Mesa no encontrada");
   if (table.status === 3)
     throw new ApiError(400, "TABLE_MAINTENANCE", "Mesa en mantenimiento");
 
-  // Parse dates
   const startTime = new Date(data.start_time);
   const endTime = new Date(data.end_time);
 
-  // Validate duration (minimum 1 hour)
   const durationHours = (endTime - startTime) / (1000 * 60 * 60);
   if (durationHours < 1) {
     throw new ApiError(
@@ -137,13 +124,11 @@ async function createReservation(data) {
     );
   }
 
-  // Validate not in the past
   const now = new Date();
   if (startTime < now) {
     throw new ApiError(400, "PAST_TIME", "No se puede reservar en el pasado");
   }
 
-  // Check for conflicts with existing reservations or active sessions
   const conflicts = await repository.findByTableAndDateRange(
     data.table_id,
     startTime,
@@ -157,7 +142,6 @@ async function createReservation(data) {
     );
   }
 
-  // Check for active session on the table
   const activeSession = await sessionRepo.findActiveByTable(data.table_id);
   if (activeSession) {
     const sessionEnd = activeSession.end_time
@@ -172,7 +156,6 @@ async function createReservation(data) {
     }
   }
 
-  // Create reservation with pending status
   const reservation = await repository.create({
     user_id: data.user_id,
     table_id: data.table_id,
@@ -181,7 +164,7 @@ async function createReservation(data) {
     end_time: endTime,
     qr_payment_path: data.qr_payment_path || null,
     payment_verified: data.payment_verified || false,
-    status: 1, // pending
+    status: 1,
   });
 
   return reservation;
@@ -198,14 +181,11 @@ async function approveReservation(id, admin_user_id) {
     );
   }
 
-  // Update status to confirmed (2) and mark payment as verified
   const updated = await repository.update(id, {
     ...reservation,
     status: 2,
     payment_verified: true,
   });
-
-  // TODO: Send notification via socket.io to user
 
   return updated;
 }
@@ -221,10 +201,7 @@ async function rejectReservation(id, admin_user_id, reason) {
     );
   }
 
-  // Update status to cancelled (3)
   const updated = await repository.updateStatus(id, 3);
-
-  // TODO: Send notification via socket.io to user with reason
 
   return updated;
 }
@@ -232,7 +209,6 @@ async function rejectReservation(id, admin_user_id, reason) {
 async function updateReservation(id, data) {
   const existing = await getReservationById(id);
 
-  // Merge with existing to avoid undefined
   const payload = {
     user_id: data.user_id !== undefined ? data.user_id : existing.user_id,
     table_id: data.table_id !== undefined ? data.table_id : existing.table_id,

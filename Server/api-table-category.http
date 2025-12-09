@@ -1,0 +1,46 @@
+@baseUrl = http://localhost:3000
+ 
+### Listar todas las categorías
+GET {{baseUrl}}/api/table-categories
+Accept: application/json
+ 
+### Listar categorías
+GET {{baseUrl}}/api/table-categories?limit=2&offset=0
+Accept: application/json
+ 
+### Obtener categoría por id
+GET {{baseUrl}}/api/table-categories/1
+Accept: application/json
+ 
+### Crear categoría
+POST {{baseUrl}}/api/table-categories
+Content-Type: application/json
+ 
+{
+  "name": "Pool VIP",
+  "description": "Mesa pool de alta calidad",
+  "base_price": 15.50
+}
+ 
+### Crear categoría
+POST {{baseUrl}}/api/table-categories
+Content-Type: application/json
+ 
+{
+  "name": "Snooker",
+  "description": "Mesa para snooker profesional",
+  "base_price": 20.00
+}
+ 
+### Actualizar categoría
+PUT {{baseUrl}}/api/table-categories/4
+Content-Type: application/json
+ 
+{
+  "name": "Pool SNOOKER Actualizada",
+  "description": "Descripción actualizada",
+  "base_price": 18.00
+}
+ 
+### Eliminar categoría
+DELETE {{baseUrl}}/api/table-categories/4

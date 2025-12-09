@@ -26,18 +26,15 @@ async function getSessionById(id) {
 }
 
 async function startSession(data) {
-  // Validate required fields
   if (!data.table_id) {
     throw new ApiError(400, "MISSING_TABLE", "Se requiere el ID de la mesa");
   }
 
-  // Validate table exists
   const table = await tableRepo.findById(data.table_id);
   if (!table) throw new ApiError(404, "TABLE_NOT_FOUND", "Mesa no encontrada");
   if (table.status === 3)
     throw new ApiError(400, "TABLE_MAINTENANCE", "Mesa en mantenimiento");
 
-  // Check if table already has an active session
   const activeSession = await repository.findActiveByTableId(data.table_id);
   if (activeSession) {
     throw new ApiError(409, "TABLE_BUSY", "La mesa ya tiene una sesión activa");
@@ -48,7 +45,6 @@ async function startSession(data) {
   let reservation_id = null;
   let user_id = data.user_id || null;
 
-  // If reservation_id is provided, validate it
   if (data.reservation_id) {
     const reservation = await reservationRepo.findById(data.reservation_id);
     if (!reservation) {
@@ -67,7 +63,6 @@ async function startSession(data) {
       throw new ApiError(400, "TABLE_MISMATCH", "La reserva es para otra mesa");
     }
 
-    // Check if reservation time is close (within 30 minutes)
     const resStart = new Date(reservation.start_time);
     const timeDiff = Math.abs(resStart - now) / (1000 * 60); // minutes
     if (timeDiff > 30) {
@@ -78,7 +73,6 @@ async function startSession(data) {
       );
     }
 
-    // Check if reservation already has a session
     const existingSession = await repository.findByReservation(
       data.reservation_id
     );
@@ -94,7 +88,6 @@ async function startSession(data) {
     reservation_id = reservation.id;
     user_id = reservation.user_id;
   } else {
-    // Walk-in: check no upcoming reservations in next 2 hours
     const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000);
     const upcomingReservations = await reservationRepo.findByTableAndDateRange(
       data.table_id,
@@ -114,10 +107,8 @@ async function startSession(data) {
     }
   }
 
-  // Update table status to occupied (usar updateStatus para evitar conflictos)
   await tableRepo.updateStatus(data.table_id, 2);
 
-  // Create session
   const session = await repository.create({
     user_id,
     reservation_id,
@@ -142,21 +133,16 @@ async function endSession(id) {
   const now = new Date();
   const startTime = new Date(session.start_time);
 
-  // Calculate duration in hours (round up to next hour)
   const durationMs = now - startTime;
   const durationHours = Math.ceil(durationMs / (1000 * 60 * 60));
 
-  // Get table category to calculate cost
   const table = await tableRepo.findById(session.table_id);
   const category = await tableCategoryRepo.findById(table.category_id);
 
-  // Calculate cost: base_price * hours
   const finalCost = category.base_price * durationHours;
 
-  // Close session
   const closedSession = await repository.closeSession(id, now, finalCost);
 
-  // Update table status back to available (usar updateStatus)
   await tableRepo.updateStatus(session.table_id, 1);
 
   return closedSession;
@@ -166,13 +152,11 @@ async function createSession(data) {
   if (!data.table_id || !data.start_time)
     throw new ApiError(400, "MISSING_FIELDS", "Faltan campos requeridos");
   
-  // Verificar que la mesa no tenga una sesión activa
   const activeSession = await repository.findActiveByTableId(data.table_id);
   if (activeSession) {
     throw new ApiError(409, "TABLE_BUSY", "La mesa ya tiene una sesión activa. Finalice la sesión actual antes de iniciar una nueva.");
   }
   
-  // Actualizar estado de la mesa a ocupada (2)
   await tableRepo.updateStatus(data.table_id, 2);
   
   return await repository.create(data);
@@ -205,44 +189,26 @@ async function updateSession(id, data) {
 
 async function finalizeSession(id, data = {}) {
   try {
-    console.log('=== Finalizing Session ===');
-    console.log('Session ID:', id);
-    console.log('Data:', JSON.stringify(data));
-    
     const session = await getSessionById(id);
-    console.log('Session found:', { id: session.id, start_time: session.start_time, table_id: session.table_id });
     
-    // Obtener información de la mesa y categoría para calcular precio
     const table = await tableRepo.findById(session.table_id);
-    console.log('Table found:', { id: table.id, category_id: table.category_id });
     
     const category = await tableCategoryRepo.findById(table.category_id);
-    console.log('Category found:', { id: category.id, base_price: category.base_price });
     
     const endTime = new Date();
     const startTime = new Date(session.start_time);
-    console.log('Start time:', startTime.toISOString());
-    console.log('End time:', endTime.toISOString());
     
     const durationMs = endTime.getTime() - startTime.getTime();
-    const durationHours = Math.max(0, durationMs / (1000 * 60 * 60)); // Mínimo 0 horas
-    console.log('Duration:', durationHours, 'hours');
+    const durationHours = Math.max(0, durationMs / (1000 * 60 * 60));
     
-    // Calcular costo base (mínimo 0)
     let finalCost = Math.max(0, durationHours * category.base_price);
-    console.log('Base cost:', finalCost);
     
-    // Agregar penalización si existe
     if (data.penalty_amount && !isNaN(data.penalty_amount)) {
       finalCost += Number(data.penalty_amount);
-      console.log('Final cost with penalty:', finalCost);
     }
     
-    // Convertir end_time a formato MySQL: YYYY-MM-DD HH:MM:SS
     const endTimeMysql = endTime.toISOString().slice(0, 19).replace('T', ' ');
-    console.log('End time MySQL format:', endTimeMysql);
     
-    // Actualizar sesión (mantener todos los campos existentes)
     const updatedSession = await repository.update(id, {
       user_id: session.user_id,
       reservation_id: session.reservation_id,
@@ -251,21 +217,16 @@ async function finalizeSession(id, data = {}) {
       end_time: endTimeMysql,
       session_type: session.session_type,
       final_cost: finalCost,
-      status: 2 // cerrada
+      status: 2
     });
-    console.log('Session updated');
     
-    // Crear registro de pago automáticamente
     await paymentRepository.create({
       session_id: id,
       amount: finalCost,
-      method: data.payment_method || 1 // 1=efectivo por defecto
+      method: data.payment_method || 1
     });
-    console.log('Payment created');
     
-    // Actualizar estado de la mesa a disponible (1)
     await tableRepo.updateStatus(session.table_id, 1);
-    console.log('Table status updated to available');
     
     return updatedSession;
   } catch (error) {

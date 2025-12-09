@@ -3,6 +3,22 @@ const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagin
 
 async function list(req, res, next) {
   try {
+    if (req.query.session_id) {
+      const payments = await paymentService.getPaymentsBySession(Number(req.query.session_id));
+      return res.json({ 
+        success: true, 
+        data: payments,
+        pagination: {
+          currentPage: 1,
+          totalPages: 1,
+          totalItems: payments.length,
+          itemsPerPage: payments.length,
+          hasNextPage: false,
+          hasPreviousPage: false
+        }
+      });
+    }
+    
     const { page, limit, offset } = getPaginationParams(req.query);
     const { payments, total } = await paymentService.getAllPaymentsPaged(limit, offset);
     res.json(formatPaginatedResponse(payments, total, page, limit));
