@@ -29,6 +29,12 @@ async function findAllPaged(limit, offset) {
   return rows;
 }
 
+async function countTotal() {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT COUNT(*) as total FROM payments${extra}`);
+  return rows[0]?.total || 0;
+}
+
 async function findBySession(session_id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
   const rows = await db.query(`SELECT id, session_id, amount, method, created_at FROM payments WHERE session_id = ?${extra} ORDER BY created_at DESC`, [session_id]);
@@ -53,4 +59,13 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findById, create, findAll, findAllPaged, findBySession, update, deleteById };
+module.exports = { findById, create, findAll, findAllPaged, countTotal, findBySession, update, deleteById };
+
+// CREATE TABLE payments (
+//     id INT AUTO_INCREMENT PRIMARY KEY,
+//     session_id INT NOT NULL,
+//     amount DECIMAL(10,2) NOT NULL,
+//     method TINYINT NOT NULL COMMENT '1=cash,2=card,3=qr,4=other',
+//     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+//     FOREIGN KEY (session_id) REFERENCES sessions(id)
+// );

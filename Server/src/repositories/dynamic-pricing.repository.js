@@ -11,6 +11,18 @@ async function findAll() {
   return rows;
 }
 
+async function findAllPaged(limit, offset) {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT * FROM dynamic_pricing${extra} ORDER BY id DESC LIMIT ? OFFSET ?`, [limit, offset]);
+  return rows;
+}
+
+async function countTotal() {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT COUNT(*) as total FROM dynamic_pricing${extra}`);
+  return rows[0]?.total || 0;
+}
+
 async function findById(id) {
   const rows = await db.query('SELECT * FROM dynamic_pricing WHERE id = ?', [id]);
   return rows[0] || null;
@@ -56,4 +68,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, create, update, deleteById };
+module.exports = { findAll, findAllPaged, countTotal, findById, create, update, deleteById };

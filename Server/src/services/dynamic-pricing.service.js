@@ -4,6 +4,12 @@ async function getAllPricing() {
   return await repository.findAll();
 }
 
+async function getAllPricingPaged(limit, offset) {
+  const pricing = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { pricing, total };
+}
+
 async function getPricingById(id) {
   const p = await repository.findById(id);
   if (!p) throw new Error('Pricing not found');
@@ -24,4 +30,4 @@ async function deletePricing(id) {
   return await repository.deleteById(id);
 }
 
-module.exports = { getAllPricing, getPricingById, createPricing, updatePricing, deletePricing };
+module.exports = { getAllPricing, getAllPricingPaged, getPricingById, createPricing, updatePricing, deletePricing };

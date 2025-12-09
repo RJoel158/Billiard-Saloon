@@ -4,6 +4,12 @@ async function getAllCategories() {
   return await repository.findAll();
 }
 
+async function getAllCategoriesPaged(limit, offset) {
+  const categories = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { categories, total };
+}
+
 async function getCategoryById(id) {
   const category = await repository.findById(id);
   if (!category) {
@@ -46,6 +52,7 @@ async function deleteCategory(id) {
 
 module.exports = {
   getAllCategories,
+  getAllCategoriesPaged,
   getCategoryById,
   createCategory,
   updateCategory,

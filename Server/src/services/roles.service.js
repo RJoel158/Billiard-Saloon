@@ -4,6 +4,12 @@ async function getAllRoles() {
   return await repository.findAll();
 }
 
+async function getAllRolesPaged(limit, offset) {
+  const roles = await repository.findAllPaged(limit, offset);
+  const total = await repository.countTotal();
+  return { roles, total };
+}
+
 async function getRoleById(id) {
   const r = await repository.findById(id);
   if (!r) throw new Error('Role not found');
@@ -26,4 +32,4 @@ async function deleteRole(id) {
   return await repository.deleteById(id);
 }
 
-module.exports = { getAllRoles, getRoleById, createRole, updateRole, deleteRole };
+module.exports = { getAllRoles, getAllRolesPaged, getRoleById, createRole, updateRole, deleteRole };

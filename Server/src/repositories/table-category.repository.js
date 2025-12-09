@@ -45,6 +45,11 @@ async function countActive() {
   return rows[0].cnt || 0;
 }
 
+async function countTotal() {
+  const rows = await db.query('SELECT COUNT(*) as total FROM table_categories');
+  return rows[0]?.total || 0;
+}
+
 async function create(category) {
   await db.query(
     "INSERT INTO table_categories (name, description, base_price) VALUES (?, ?, ?)",
@@ -72,4 +77,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, findByName, findByNameLike, findAllPaged, countActive, create, update, deleteById };
+module.exports = { findAll, findById, findByName, findByNameLike, findAllPaged, countActive, countTotal, create, update, deleteById };

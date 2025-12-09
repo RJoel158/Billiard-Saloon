@@ -1,9 +1,11 @@
 const service = require("../services/table-category.service.js");
+const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagination');
 
 async function getAll(req, res) {
   try {
-    const categories = await service.getAllCategories();
-    res.json(categories);
+    const { page, limit, offset } = getPaginationParams(req.query);
+    const { categories, total } = await service.getAllCategoriesPaged(limit, offset);
+    res.json(formatPaginatedResponse(categories, total, page, limit));
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

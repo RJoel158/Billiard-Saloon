@@ -11,6 +11,18 @@ async function findAll() {
   return rows;
 }
 
+async function findAllPaged(limit, offset) {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT id, name FROM roles${extra} ORDER BY id LIMIT ? OFFSET ?`, [limit, offset]);
+  return rows;
+}
+
+async function countTotal() {
+  const extra = _hasActive() ? ' WHERE is_active = 1' : '';
+  const rows = await db.query(`SELECT COUNT(*) as total FROM roles${extra}`);
+  return rows[0]?.total || 0;
+}
+
 async function findById(id) {
   const extra = _hasActive() ? ' AND is_active = 1' : '';
   const rows = await db.query(`SELECT id, name FROM roles WHERE id = ?${extra}`, [id]);
@@ -43,4 +55,4 @@ async function deleteById(id) {
   return result.affectedRows > 0;
 }
 
-module.exports = { findAll, findById, findByName, create, update, deleteById };
+module.exports = { findAll, findAllPaged, countTotal, findById, findByName, create, update, deleteById };

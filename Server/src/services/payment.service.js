@@ -12,6 +12,12 @@ async function getAllPayments() {
   return await paymentRepo.findAll();
 }
 
+async function getAllPaymentsPaged(limit, offset) {
+  const payments = await paymentRepo.findAllPaged(limit, offset);
+  const total = await paymentRepo.countTotal();
+  return { payments, total };
+}
+
 async function create(data) {
   if (!data.session_id || !data.amount || !data.method) {
     throw new ApiError(400, 'INVALID_PAYLOAD', 'session_id, amount and method are required');
@@ -51,4 +57,4 @@ async function deletePayment(id) {
   return await paymentRepo.deleteById(id);
 }
 
-module.exports = { getPayment, create, getAllPayments, deletePayment };
+module.exports = { getPayment, create, getAllPayments, getAllPaymentsPaged, deletePayment };

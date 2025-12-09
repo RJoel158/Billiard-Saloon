@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const db = require("./src/db/db");
 require('dotenv').config();
+
 let tableCategoryRoutes;
 let userRoutes;
 let paymentRoutes;
@@ -11,6 +12,7 @@ let dynamicPricingRoutes;
 let reservationRoutes;
 let sessionRoutes;
 let authRoutes;
+let systemSettingsRoutes;
 const errorHandler = require("./src/middlewares/errorHandler");
 
 const app = express();
@@ -23,6 +25,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+// Middleware
+app.use(cors());
 app.use(express.json());
 
 app.use(errorHandler);
@@ -51,6 +55,8 @@ async function startServer() {
   } catch (err) {
     console.warn('⚠️ No se pudo leer el esquema de la DB:', err.message);
   }
+
+  authRoutes = require("./src/routes/auth.routes");
   tableCategoryRoutes = require("./src/routes/table-category.routes");
   userRoutes = require("./src/routes/user.routes");
   paymentRoutes = require("./src/routes/payment.routes");
@@ -59,8 +65,10 @@ async function startServer() {
   dynamicPricingRoutes = require("./src/routes/dynamic-pricing.routes");
   reservationRoutes = require("./src/routes/reservation.routes");
   sessionRoutes = require("./src/routes/session.routes");
-  authRoutes = require("./src/routes/auth.routes");
+  systemSettingsRoutes = require("./src/routes/system-settings.routes");
+  const availabilityRoutes = require("./src/routes/availability.routes");
 
+  app.use("/api/auth", authRoutes);
   app.use("/api/table-categories", tableCategoryRoutes);
   app.use('/api/users', userRoutes);
   app.use('/api/payments', paymentRoutes);
@@ -69,7 +77,8 @@ async function startServer() {
   app.use('/api/dynamic-pricing', dynamicPricingRoutes);
   app.use('/api/reservations', reservationRoutes);
   app.use('/api/sessions', sessionRoutes);
-  app.use('/api/auth', authRoutes);
+  app.use('/api/settings', systemSettingsRoutes);
+  app.use('/api/availability', availabilityRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
