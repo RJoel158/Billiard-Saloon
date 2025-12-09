@@ -3,7 +3,6 @@ const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagin
 
 async function getAll(req, res, next) {
   try {
-    // Si se pasa status=1 (activas), usar el endpoint de sesiones activas
     if (req.query.status === '1') {
       const sessions = await service.getActiveSessions();
       return res.json({ 

@@ -1,17 +1,11 @@
 const reservationService = require("../services/reservation.service");
 const settingsRepo = require("../repositories/system-settings.repository");
 
-/**
- * Get available time slots for a table on a specific date
- * Uses system settings for opening/closing hours
- * GET /api/availability/:tableId?date=YYYY-MM-DD
- */
 async function getAvailableSlots(req, res, next) {
   try {
     const { tableId } = req.params;
     const { date } = req.query;
 
-    // Validate date format
     if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
       return res.status(400).json({
         error: "INVALID_DATE",
@@ -19,10 +13,8 @@ async function getAvailableSlots(req, res, next) {
       });
     }
 
-    // Get system settings for business hours
     const settings = await settingsRepo.findByKeys(['opening_time', 'closing_time']);
     
-    // Convert array to object for easy access
     const settingsObj = settings.reduce((acc, setting) => {
       acc[setting.setting_key] = setting.setting_value;
       return acc;
@@ -35,7 +27,6 @@ async function getAvailableSlots(req, res, next) {
       ? parseInt(settingsObj.closing_time.split(":")[0])
       : 23;
 
-    // Get available slots from service
     const availableSlots = await reservationService.getAvailableSlotsWithSettings(
       parseInt(tableId),
       date,

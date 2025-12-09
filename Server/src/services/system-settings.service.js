@@ -1,6 +1,5 @@
 const repository = require('../repositories/system-settings.repository');
 
-// Parsear valor según el tipo
 function parseValue(value, type) {
   switch (type) {
     case 'number':
@@ -18,7 +17,6 @@ function parseValue(value, type) {
   }
 }
 
-// Formatear configuración para respuesta
 function formatSetting(setting) {
   if (!setting) return null;
   return {
@@ -74,7 +72,6 @@ async function updateSetting(key, value) {
   const setting = await repository.findByKey(key);
   if (!setting) throw new Error('Setting not found');
   
-  // Validar el valor según el tipo
   const stringValue = String(value);
   await repository.update(key, stringValue);
   
@@ -99,7 +96,6 @@ async function deleteSetting(key) {
   return await repository.deleteByKey(key);
 }
 
-// Obtener configuración de horario de atención
 async function getBusinessHours() {
   const settings = await repository.findByKeys(['opening_time', 'closing_time', 'business_days']);
   const result = {};
@@ -111,7 +107,6 @@ async function getBusinessHours() {
   return result;
 }
 
-// Validar si una hora está dentro del horario de atención
 function isWithinBusinessHours(time, businessHours) {
   const [hours, minutes] = time.split(':').map(Number);
   const [openHours, openMins] = businessHours.opening_time.split(':').map(Number);

@@ -37,7 +37,6 @@ async function findByTableAndDateRange(table_id, start_time, end_time) {
 }
 
 async function findAvailableSlots(table_id, date) {
-  // Get all reservations and sessions for a table on a specific date
   const rows = await db.query(
     `SELECT start_time, end_time FROM reservations 
      WHERE table_id = ? AND DATE(start_time) = DATE(?) AND status IN (1, 2)
@@ -102,7 +101,6 @@ async function countTotal() {
 }
 
 async function deleteById(id) {
-  // Logical delete: mark as cancelled (3)
   const result = await db.query(
     "UPDATE reservations SET status = 3 WHERE id = ?",
     [id]

@@ -24,11 +24,10 @@ async function getById(req, res, next) {
 
 async function create(req, res, next) {
   try {
-    // Add QR payment path if file was uploaded
     const data = { ...req.body };
     if (req.file) {
       data.qr_payment_path = req.file.path;
-      data.payment_verified = false; // Pending admin verification
+      data.payment_verified = false;
     }
     
     const item = await service.createReservation(data);
@@ -71,7 +70,7 @@ async function getAvailableSlots(req, res, next) {
 
 async function approve(req, res, next) {
   try {
-    const admin_user_id = req.body.admin_user_id || req.user?.id; // Assumes auth middleware sets req.user
+    const admin_user_id = req.body.admin_user_id || req.user?.id;
     const item = await service.approveReservation(req.params.id, admin_user_id);
     res.json({ success: true, data: item });
   } catch (err) {
@@ -101,10 +100,8 @@ async function getQRImage(req, res, next) {
       });
     }
 
-    // Resolve the file path
     const filePath = path.resolve(reservation.qr_payment_path);
     
-    // Check if file exists
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ 
         error: 'FILE_NOT_FOUND', 
@@ -112,7 +109,6 @@ async function getQRImage(req, res, next) {
       });
     }
 
-    // Send file
     res.sendFile(filePath);
   } catch (err) {
     next(err);

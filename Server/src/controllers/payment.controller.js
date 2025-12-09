@@ -3,7 +3,6 @@ const { getPaginationParams, formatPaginatedResponse } = require('../utils/pagin
 
 async function list(req, res, next) {
   try {
-    // Si se pasa session_id como query param, filtrar por sesión
     if (req.query.session_id) {
       const payments = await paymentService.getPaymentsBySession(Number(req.query.session_id));
       return res.json({ 

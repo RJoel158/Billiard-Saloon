@@ -60,14 +60,3 @@ async function deleteById(id) {
 }
 
 module.exports = { findById, create, findAll, findAllPaged, countTotal, findBySession, findBySessionId: findBySession, update, deleteById };
-
-
-
-// CREATE TABLE payments (
-//     id INT AUTO_INCREMENT PRIMARY KEY,
-//     session_id INT NOT NULL,
-//     amount DECIMAL(10,2) NOT NULL,
-//     method TINYINT NOT NULL COMMENT '1=cash,2=card,3=qr,4=other',
-//     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-//     FOREIGN KEY (session_id) REFERENCES sessions(id)
-// );

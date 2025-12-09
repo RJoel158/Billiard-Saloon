@@ -133,7 +133,6 @@ async function closeSession(id, end_time, final_cost) {
 }
 
 async function deleteById(id) {
-  // Logical delete: mark session as cancelled (3)
   const result = await db.query("UPDATE sessions SET status = 3 WHERE id = ?", [
     id,
   ]);
