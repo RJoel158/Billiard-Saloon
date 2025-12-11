@@ -41,7 +41,6 @@ async function getAvailableSlots(table_id, date) {
     const slotEnd = new Date(slotStart);
     slotEnd.setHours(hour + 1, 0, 0, 0);
 
-    // Check if this slot conflicts with any busy slot
     const hasConflict = busySlots.some((busy) => {
       const busyStart = new Date(busy.start_time);
       const busyEnd = new Date(busy.end_time);

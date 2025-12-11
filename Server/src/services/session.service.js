@@ -41,7 +41,7 @@ async function startSession(data) {
   }
 
   const now = new Date();
-  let sessionType = 2; // walk-in by default
+  let sessionType = 2;
   let reservation_id = null;
   let user_id = data.user_id || null;
 
@@ -84,7 +84,7 @@ async function startSession(data) {
       );
     }
 
-    sessionType = 1; // reservation
+    sessionType = 1;
     reservation_id = reservation.id;
     user_id = reservation.user_id;
   } else {
@@ -117,7 +117,7 @@ async function startSession(data) {
     end_time: null,
     session_type: sessionType,
     final_cost: 0,
-    status: 1, // active
+    status: 1,
   });
 
   return session;

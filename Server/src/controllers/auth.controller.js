@@ -15,7 +15,6 @@ class AuthController {
         throw new ApiError(400, 'Email y contraseña son requeridos');
       }
 
-      // Buscar usuario por email
       const sql = `
         SELECT u.*, r.name as role_name 
         FROM users u
@@ -30,13 +29,11 @@ class AuthController {
 
       const user = users[0];
 
-      // Verificar contraseña
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         throw new ApiError(401, 'Credenciales inválidas');
       }
 
-      // Generar token JWT
       const token = jwt.sign(
         { 
           id: user.id, 
@@ -47,7 +44,6 @@ class AuthController {
         { expiresIn: JWT_EXPIRES_IN }
       );
 
-      // Remover password de la respuesta
       delete user.password;
 
       res.json({
@@ -68,23 +64,19 @@ class AuthController {
         throw new ApiError(400, 'Todos los campos son requeridos');
       }
 
-      // Verificar si el email ya existe
       const existingUsers = await query('SELECT id FROM users WHERE email = ?', [email]);
       if (existingUsers.length > 0) {
         throw new ApiError(400, 'El email ya está registrado');
       }
 
-      // Hash de la contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Crear usuario
       const sql = `
         INSERT INTO users (role_id, first_name, last_name, email, password)
         VALUES (?, ?, ?, ?, ?)
       `;
       const result = await query(sql, [role_id, first_name, last_name, email, hashedPassword]);
 
-      // Generar token
       const token = jwt.sign(
         { 
           id: result.insertId, 

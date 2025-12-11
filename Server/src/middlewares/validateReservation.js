@@ -1,23 +1,18 @@
 const settingsRepository = require('../repositories/system-settings.repository');
 
-/**
- * Middleware para validar que una reserva cumpla con las reglas del sistema
- */
 async function validateReservation(req, res, next) {
   try {
     const { reservation_date, start_time, duration_hours } = req.body;
     
     if (!reservation_date || !start_time) {
-      return next(); // Si no hay datos de reserva, dejar pasar (validación básica se hará en otro lugar)
+      return next();
     }
 
-    // Cargar configuración del sistema
     const settings = await loadSettings();
     
     const reservationDate = new Date(start_time);
     const now = new Date();
     
-    // 1. Validar día laborable
     const dayOfWeek = reservationDate.getDay() === 0 ? 7 : reservationDate.getDay();
     if (!settings.business_days.includes(dayOfWeek)) {
       return res.status(400).json({
@@ -26,7 +21,6 @@ async function validateReservation(req, res, next) {
       });
     }
     
-    // 2. Validar horario de atención
     const hour = reservationDate.getHours();
     const minute = reservationDate.getMinutes();
     const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
@@ -38,7 +32,6 @@ async function validateReservation(req, res, next) {
       });
     }
     
-    // 3. Validar duración mínima y máxima
     if (duration_hours) {
       const durationMinutes = duration_hours * 60;
       
@@ -57,7 +50,6 @@ async function validateReservation(req, res, next) {
       }
     }
     
-    // 4. Validar anticipación mínima
     const hoursInAdvance = (reservationDate - now) / (1000 * 60 * 60);
     if (hoursInAdvance < settings.min_advance_hours) {
       return res.status(400).json({
@@ -66,7 +58,6 @@ async function validateReservation(req, res, next) {
       });
     }
     
-    // 5. Validar anticipación máxima
     const daysInAdvance = hoursInAdvance / 24;
     if (daysInAdvance > settings.max_advance_days) {
       return res.status(400).json({
@@ -82,9 +73,6 @@ async function validateReservation(req, res, next) {
   }
 }
 
-/**
- * Cargar todas las configuraciones del sistema
- */
 async function loadSettings() {
   const allSettings = await settingsRepository.findAll();
   

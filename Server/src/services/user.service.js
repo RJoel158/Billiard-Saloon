@@ -29,7 +29,6 @@ async function updateUser(id, data) {
   if (!existing)
     throw new ApiError(404, "USER_NOT_FOUND", "Usuario no encontrado");
 
-  // Merge with existing data to avoid undefined values in query params
   const payload = {
     role_id: data.role_id !== undefined ? data.role_id : existing.role_id,
     first_name:
@@ -56,4 +55,4 @@ async function deleteUser(id) {
   return true;
 }
 
-module.exports = { getUser, createUser, getAllUsers, updateUser, deleteUser };
+module.exports = { getUser, createUser, getAllUsers, getAllUsersPaged, updateUser, deleteUser };
